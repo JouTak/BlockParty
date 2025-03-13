@@ -1,0 +1,4 @@
+name: Template
+version: '$version'
+main: com.joutak.template.EmptyPlugin
+api-version: '1.20'
