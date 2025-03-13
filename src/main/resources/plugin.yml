@@ -1,4 +1,4 @@
-name: Template
+name: BlockParty
 version: '$version'
-main: com.joutak.template.EmptyPlugin
+main: ru.joutak.blockparty.GamePlugin
 api-version: '1.20'

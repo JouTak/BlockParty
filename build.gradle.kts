@@ -1,4 +1,4 @@
-group = "com.joutak"
+group = "ru.joutak"
 version = System.getProperty("version")
 val commitHash = System.getProperty("commitHash")
 if (commitHash.isNotBlank()) {
