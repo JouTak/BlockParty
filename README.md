@@ -1,5 +1,5 @@
 # BlockParty
-BlockParty for ITMOCraft Spartakiada (04-2025)
+BlockParty for ITMOCraft Spartakiada (19.04.2025)
 
 ## Building JAR
 
