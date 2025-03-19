@@ -2,3 +2,6 @@ name: BlockParty
 version: '$version'
 main: ru.joutak.blockparty.GamePlugin
 api-version: '1.20'
+commands:
+  bp:
+    description: block party commands

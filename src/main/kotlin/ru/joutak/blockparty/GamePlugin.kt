@@ -1,13 +1,14 @@
-package com.joutak.template
+package ru.joutak.blockparty
 
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
+import ru.joutak.blockparty.Commands.BlockPartyCommandExecutor
 import java.io.File
 
-class EmptyPlugin : JavaPlugin() {
+class GamePlugin : JavaPlugin() {
     companion object {
         @JvmStatic
-        lateinit var instance: EmptyPlugin
+        lateinit var instance: GamePlugin
     }
 
     private var customConfig = YamlConfiguration()
@@ -25,9 +26,15 @@ class EmptyPlugin : JavaPlugin() {
 
         loadConfig()
 
+        registerCommands()
+
         // Register commands and events
 
         logger.info("Template plugin version ${pluginMeta.version} enabled!")
+    }
+
+    fun registerCommands() {
+        getCommand("bp")?.setExecutor(BlockPartyCommandExecutor())
     }
 
     override fun onDisable() {
