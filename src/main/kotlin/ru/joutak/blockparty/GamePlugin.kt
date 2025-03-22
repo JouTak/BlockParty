@@ -2,7 +2,7 @@ package ru.joutak.blockparty
 
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
-import ru.joutak.blockparty.Commands.BlockPartyCommandExecutor
+import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
 import java.io.File
 
 class GamePlugin : JavaPlugin() {
@@ -23,18 +23,12 @@ class GamePlugin : JavaPlugin() {
     override fun onEnable() {
         // Plugin startup logic
         instance = this
-
         loadConfig()
 
-        registerCommands()
-
         // Register commands and events
+        getCommand("bp")?.setExecutor(BlockPartyCommandExecutor)
 
-        logger.info("Template plugin version ${pluginMeta.version} enabled!")
-    }
-
-    fun registerCommands() {
-        getCommand("bp")?.setExecutor(BlockPartyCommandExecutor())
+        logger.info("${pluginMeta.name} plugin version ${pluginMeta.version} enabled!")
     }
 
     override fun onDisable() {
