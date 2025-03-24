@@ -35,8 +35,11 @@ kotlin {
 tasks.shadowJar {
     archiveClassifier = ""
     archiveFileName.set("${project.name}.jar")
+
+    val serverPath = System.getenv("SERVER_PATH")
     if (System.getenv("TESTING") != null) {
-        destinationDirectory.set(file("${layout.projectDirectory}/../1.20.1-server/plugins/"))
+        if (serverPath != null) destinationDirectory.set(file("$serverPath\\plugins"))
+        else logger.warn("SERVER_PATH property is not set!")
     }
 }
 
