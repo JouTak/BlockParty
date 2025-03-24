@@ -5,10 +5,10 @@ import org.bukkit.plugin.java.JavaPlugin
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
 import java.io.File
 
-class GamePlugin : JavaPlugin() {
+class BlockPartyPlugin : JavaPlugin() {
     companion object {
         @JvmStatic
-        lateinit var instance: GamePlugin
+        lateinit var instance: BlockPartyPlugin
     }
 
     private var customConfig = YamlConfiguration()
@@ -19,6 +19,7 @@ class GamePlugin : JavaPlugin() {
             saveResource("config.yml", true)
         }
     }
+
 
     override fun onEnable() {
         // Plugin startup logic
