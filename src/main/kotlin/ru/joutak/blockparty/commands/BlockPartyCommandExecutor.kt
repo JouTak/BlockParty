@@ -18,11 +18,18 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, string: String, args: Array<out String>?): Boolean {
-        if (sender !is Player) return false
-        if (!sender.isOp) return false
+        if (!sender.isOp) {
+            sender.sendMessage("Недостаточно прав для использования данной команды.")
+            return true
+        }
 
         if (args?.getOrNull(0) in commands.keys)
-            return commands[args!![0]]!!.execute(sender, command, string, args)
+            return commands[args!![0]]!!.execute(
+                sender,
+                command,
+                string,
+                if (args.size > 1) args.sliceArray(1 until args.size) else emptyArray()
+            )
 
         return false
     }
@@ -31,8 +38,15 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
         return when (args.size) {
             1 -> commands.keys.toList()
             else -> {
-                if (args[0] !in commands.keys) emptyList<String>()
-                else commands[args[0]]!!.getTabHint(args.size - 1)
+                if (args[0] !in commands.keys)
+                    emptyList<String>()
+                else
+                    commands[args[0]]!!.getTabHint(
+                        sender,
+                        command,
+                        alias,
+                        args.sliceArray(1 until args.size)
+                    )
             }
         }
     }

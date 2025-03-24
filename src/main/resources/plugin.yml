@@ -6,3 +6,9 @@ depend: ['Multiverse-Core']
 commands:
   bp:
     description: block party commands
+    permission: op
+    usage: |
+      /bp start - ONLY FOR TESTS
+      /bp create <name> <x1> <y1> <z1> <x2> <y2> <z2>
+      /bp list
+      /bp info <name>
