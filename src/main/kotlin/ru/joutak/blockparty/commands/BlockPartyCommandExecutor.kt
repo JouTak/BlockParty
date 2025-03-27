@@ -4,13 +4,16 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
-import org.bukkit.entity.Player
 
 object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     private val commands = mutableMapOf<String, BlockPartyCommand>()
 
     init {
         registerCommand(BlockPartyStartCommand)
+        registerCommand(BlockPartyCreateCommand)
+        registerCommand(BlockPartyRemoveCommand)
+        registerCommand(BlockPartyInfoCommand)
+        registerCommand(BlockPartyListCommand)
     }
 
     private fun registerCommand(command : BlockPartyCommand) {

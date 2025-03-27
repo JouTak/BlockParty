@@ -13,7 +13,7 @@ object BlockPartyInfoCommand : BlockPartyCommand("info", listOf<String>("name"))
         try {
             val arena = ArenaManager.get(args[0])
 
-            sender.sendMessage("Информация о зоне ${arena.name}:")
+            sender.sendMessage("Информация об арене ${arena.name}:")
             sender.sendMessage("Мир: ${arena.worldName}")
             sender.sendMessage("Координаты: (${arena.x1}, ${arena.y1}, ${arena.z1} ; ${arena.x2}, ${arena.y2}, ${arena.z2})")
             sender.sendMessage("Состояние: ${arena.getState()}")

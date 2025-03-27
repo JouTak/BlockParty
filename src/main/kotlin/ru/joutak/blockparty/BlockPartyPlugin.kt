@@ -1,10 +1,12 @@
 package ru.joutak.blockparty
 
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
+import ru.joutak.blockparty.listeners.LobbyListener
 import java.io.File
 import java.io.IOException
 
@@ -21,6 +23,7 @@ class BlockPartyPlugin : JavaPlugin() {
         val fx = File(dataFolder, "config.yml")
         if (!fx.exists()) {
             saveResource("config.yml", true)
+            return
         }
     }
 
@@ -67,7 +70,9 @@ class BlockPartyPlugin : JavaPlugin() {
         loadArenas()
 
         // Register commands and events
+        Bukkit.getPluginManager().registerEvents(LobbyListener, this)
         getCommand("bp")?.setExecutor(BlockPartyCommandExecutor)
+
 
         logger.info("${pluginMeta.name} plugin version ${pluginMeta.version} enabled!")
     }
