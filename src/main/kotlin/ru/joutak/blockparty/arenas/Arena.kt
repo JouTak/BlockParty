@@ -1,6 +1,8 @@
 package ru.joutak.blockparty.arenas
 
-import org.bukkit.entity.Player
+import org.bukkit.Bukkit
+import ru.joutak.blockparty.Config
+import java.util.UUID
 
 data class Arena(
     val name: String,
@@ -9,10 +11,17 @@ data class Arena(
     val x2: Double, val y2: Double, val z2: Double
 ) {
     private var state = ArenaState.READY
-    private val players = mutableSetOf<Player>()
+    private val players = mutableSetOf<UUID>()
+    private var floor = Floor()
+
+    init {
+        Bukkit.getLogger().info("Configuring arena $name (world $worldName)")
+        Config.configureWorld(this.worldName)
+    }
 
     companion object {
         fun deserialize(values: Map<String, Any>): Arena {
+            Bukkit.getLogger().info("Deserializing arena ${values["name"]}")
             return Arena(
                 values["name"] as String,
                 values["worldName"] as String,

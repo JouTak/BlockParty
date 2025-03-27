@@ -21,6 +21,14 @@ object ArenaManager {
         return arenas
     }
 
+    fun getReadyArena() : Arena? {
+        for (arena in arenas.values) {
+            if (arena.getState() == ArenaState.READY)
+                return arena
+        }
+        return null
+    }
+
     fun remove(name: String) {
         if (!arenas.containsKey(name))
             throw IllegalArgumentException("Арены с таким именем не существует.")
@@ -30,5 +38,13 @@ object ArenaManager {
 
     fun clear() {
         arenas.clear()
+    }
+
+    fun hasReadyArena(): Boolean {
+        for (arena in arenas.values) {
+            if (arena.getState() == ArenaState.READY)
+                return true
+        }
+        return false
     }
 }
