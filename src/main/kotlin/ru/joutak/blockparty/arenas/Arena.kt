@@ -1,8 +1,11 @@
 package ru.joutak.blockparty.arenas
 
 import org.bukkit.Bukkit
+import org.bukkit.Difficulty
+import org.bukkit.GameMode
+import org.bukkit.Location
 import ru.joutak.blockparty.Config
-import java.util.UUID
+import ru.joutak.blockparty.utils.PluginManager
 
 data class Arena(
     val name: String,
@@ -11,12 +14,12 @@ data class Arena(
     val x2: Double, val y2: Double, val z2: Double
 ) {
     private var state = ArenaState.READY
-    private val players = mutableSetOf<UUID>()
-    private var floor = Floor()
+    private var currentFloorId: Int = -1
+    val center = Location(Bukkit.getWorld(worldName), (x1 + x2) / 2, y1 + 2, (z1 + z2) / 2)
+    private val threshold = 2
 
     init {
-        Bukkit.getLogger().info("Configuring arena $name (world $worldName)")
-        Config.configureWorld(this.worldName)
+        this.reset()
     }
 
     companion object {
@@ -39,8 +42,37 @@ data class Arena(
         return state
     }
 
+    fun getCurrentFloorId(): Int {
+        return currentFloorId
+    }
+
     fun setState(state: ArenaState) {
         this.state = state
+    }
+
+    fun setCurrentFloorId(floorId: Int) {
+        if (floorId !in 0..<Config.NUMBER_OF_FLOORS)
+            throw IllegalArgumentException("Неверный floorId: $floorId (макс. допустимое значение ${Config.NUMBER_OF_FLOORS - 1})")
+
+        this.currentFloorId = floorId
+    }
+
+    fun isInside(playerLoc: Location): Boolean {
+        return playerLoc.x in this.x1 - threshold..this.x2 + threshold&&
+                playerLoc.y in this.y1 - threshold..this.y2 + threshold &&
+                playerLoc.z in this.z1 - threshold..this.z2 + threshold
+    }
+
+    fun reset() {
+        val worldManager = PluginManager.multiverseCore.mvWorldManager
+        val mvWorld = worldManager.getMVWorld(worldName)
+        mvWorld.setTime("day")
+        mvWorld.setEnableWeather(false)
+        mvWorld.setDifficulty(Difficulty.PEACEFUL)
+        mvWorld.setGameMode(GameMode.ADVENTURE)
+        mvWorld.setPVPMode(false)
+        mvWorld.setHunger(false)
+        setState(ArenaState.READY)
     }
 
     fun serialize(): Map<String, Any> {

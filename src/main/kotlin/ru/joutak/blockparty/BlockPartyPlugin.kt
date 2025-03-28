@@ -21,9 +21,9 @@ class BlockPartyPlugin : JavaPlugin() {
         ArenaManager.loadArenas()
 
         // Register commands and events
-        Bukkit.getPluginManager().registerEvents(LobbyListener, this)
+        Bukkit.getPluginManager().registerEvents(LobbyListener, instance)
+        Bukkit.getPluginManager().registerEvents(PlayerMoveListener, instance)
         getCommand("bp")?.setExecutor(BlockPartyCommandExecutor)
-
 
         logger.info("${pluginMeta.name} plugin version ${pluginMeta.version} enabled!")
     }

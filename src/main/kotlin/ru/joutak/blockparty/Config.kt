@@ -1,9 +1,5 @@
 package ru.joutak.blockparty
 
-import org.bukkit.Bukkit
-import org.bukkit.Difficulty
-import org.bukkit.GameMode
-import org.bukkit.World
 import org.bukkit.configuration.file.YamlConfiguration
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
@@ -33,18 +29,5 @@ object Config {
         PLAYERS_TO_END = config.getInt("PLAYERS_TO_END", 4)
         TIME_TO_START_GAME_LOBBY = config.getInt("TIME_TO_START_GAME_LOBBY", 30)
         TIME_BETWEEN_ROUNDS = config.getInt("TIME_BETWEEN_ROUNDS", 10)
-    }
-
-    fun configureWorld(worldName: String) {
-        configureWorld(Bukkit.getWorld(worldName)!!)
-    }
-
-    fun configureWorld(world: World) {
-        val worldManager = PluginManager.multiverseCore.mvWorldManager
-        val mvWorld = worldManager.getMVWorld(world)
-        mvWorld.setDifficulty(Difficulty.PEACEFUL)
-        mvWorld.setGameMode(GameMode.ADVENTURE)
-        mvWorld.setPVPMode(false)
-        mvWorld.setHunger(false)
     }
 }

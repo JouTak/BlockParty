@@ -2,6 +2,9 @@ package ru.joutak.blockparty.games
 
 enum class GamePhase {
     WAIT,
-    PLAY,
-    STOP
+    CHOOSE_BLOCK,
+    COUNTDOWN,
+    BREAK_FLOOR,
+    CHECK_PLAYERS,
+    FINISH
 }

@@ -3,6 +3,8 @@ package ru.joutak.blockparty.utils
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.LinearComponents
 import org.bukkit.Bukkit
+import org.bukkit.Difficulty
+import org.bukkit.GameMode
 import org.bukkit.World
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.Config
@@ -12,7 +14,7 @@ import java.util.*
 
 object LobbyManager {
     val world : World
-    private val players = mutableListOf<UUID>()
+    private val players = LinkedHashSet<UUID>()
     private var gameStartTask: Int? = null
 
     init {
@@ -25,11 +27,18 @@ object LobbyManager {
 
         val worldManager = PluginManager.multiverseCore.mvWorldManager
         worldManager.setFirstSpawnWorld(world.name)
-        Config.configureWorld(world)
+        val mvWorld = worldManager.getMVWorld(world)
+        mvWorld.setTime("day")
+        mvWorld.setEnableWeather(false)
+        mvWorld.setDifficulty(Difficulty.PEACEFUL)
+        mvWorld.setGameMode(GameMode.ADVENTURE)
+        mvWorld.setPVPMode(false)
+        mvWorld.setHunger(false)
     }
 
     fun addPlayer(player: Player) {
 //        Bukkit.getLogger().info("${player.name} added the player!")
+        PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), player, world.spawnLocation)
         players.add(player.uniqueId)
         check()
     }
@@ -41,12 +50,17 @@ object LobbyManager {
     }
 
     fun getPlayers(): List<UUID> {
-        return players
+        return players.toList()
+    }
+
+    fun resetTask() {
+        gameStartTask = null
     }
 
     fun check() {
 //        Bukkit.getLogger().info("${world.playerCount} в лобби")
 //        Bukkit.getLogger().info("${Config.PLAYERS_TO_START} needed")
+        Bukkit.getLogger().info("count: ${players.count()}, ready arena: ${ArenaManager.hasReadyArena()}, game task: ${gameStartTask}")
         if (players.count() >= Config.PLAYERS_TO_START && ArenaManager.hasReadyArena() && gameStartTask == null) {
 //            val game = GameManager.prepareGame(players.slice(0..<Config.PLAYERS_TO_START))
             Bukkit.getServer().broadcast(LinearComponents.linear(text("Игра начнется через ${Config.TIME_TO_START_GAME_LOBBY} секунд!")))
@@ -58,6 +72,7 @@ object LobbyManager {
         else if (players.count() < Config.PLAYERS_TO_START && gameStartTask != null) {
             Bukkit.getServer().broadcast(LinearComponents.linear(text("Недостаточно игроков для начала игры!")))
             Bukkit.getScheduler().cancelTask(gameStartTask!!)
+            gameStartTask = null
         }
     }
 }
