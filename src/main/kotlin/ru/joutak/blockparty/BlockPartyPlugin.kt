@@ -5,8 +5,9 @@ import org.bukkit.plugin.java.JavaPlugin
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
 import ru.joutak.blockparty.listeners.LobbyListener
-import java.io.File
-import java.io.IOException
+import ru.joutak.blockparty.listeners.PlayerMoveListener
+import ru.joutak.blockparty.players.PlayerData
+
 
 class BlockPartyPlugin : JavaPlugin() {
     companion object {
@@ -29,7 +30,9 @@ class BlockPartyPlugin : JavaPlugin() {
 
     override fun onDisable() {
         // Plugin shutdown logic
-
+        for (player in Bukkit.getOnlinePlayers()) {
+            PlayerData.get(player.uniqueId).saveData()
+        }
 
         ArenaManager.saveArenas()
     }
