@@ -1,9 +1,7 @@
 package ru.joutak.blockparty
 
 import org.bukkit.Bukkit
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
-import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
 import ru.joutak.blockparty.listeners.LobbyListener
@@ -16,58 +14,10 @@ class BlockPartyPlugin : JavaPlugin() {
         lateinit var instance: BlockPartyPlugin
     }
 
-    private var customConfig = YamlConfiguration()
-    private var arenasFile = YamlConfiguration()
-
-    private fun loadConfig() {
-        val fx = File(dataFolder, "config.yml")
-        if (!fx.exists()) {
-            saveResource("config.yml", true)
-            return
-        }
-    }
-
-    private fun loadArenas() {
-        val fx = File(dataFolder, "arenas.yml")
-        if (!fx.exists()) return
-
-        arenasFile = YamlConfiguration.loadConfiguration(fx)
-        val arenasList = arenasFile.getList("arenas") as? List<Map<String, Any>> ?: return
-
-        ArenaManager.clear()
-
-        for (value in arenasList) {
-            try {
-                ArenaManager.add(Arena.deserialize(value))
-            } catch (e: Exception) {
-                logger.severe("Ошибка при загрузке зон: ${e.message}")
-                break
-            }
-        }
-    }
-
-    private fun saveArenas() {
-        val fx = File(dataFolder, "arenas.yml")
-        if (!fx.exists()) {
-            saveResource("arenas.yml", true)
-        }
-
-        arenasFile.set("arenas", ArenaManager.getArenas().values.map {
-            value -> value.serialize()
-        })
-
-        try {
-            arenasFile.save(fx)
-        } catch (e: IOException) {
-            logger.severe("Ошибка при сохранении зон: ${e.message}")
-        }
-    }
-
     override fun onEnable() {
         // Plugin startup logic
         instance = this
-        loadConfig()
-        loadArenas()
+        ArenaManager.loadArenas()
 
         // Register commands and events
         Bukkit.getPluginManager().registerEvents(LobbyListener, this)
@@ -79,6 +29,8 @@ class BlockPartyPlugin : JavaPlugin() {
 
     override fun onDisable() {
         // Plugin shutdown logic
-        saveArenas()
+
+
+        ArenaManager.saveArenas()
     }
 }

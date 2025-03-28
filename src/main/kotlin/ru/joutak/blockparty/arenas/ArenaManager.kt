@@ -1,7 +1,14 @@
 package ru.joutak.blockparty.arenas
 
+import org.bukkit.Bukkit
+import org.bukkit.configuration.file.YamlConfiguration
+import ru.joutak.blockparty.utils.PluginManager
+import java.io.File
+import java.io.IOException
+
 object ArenaManager {
     private val arenas = mutableMapOf<String, Arena>()
+    private var arenasFile = YamlConfiguration()
 
     fun add(arena: Arena) {
         if (arenas.containsKey(arena.name))
@@ -46,5 +53,40 @@ object ArenaManager {
                 return true
         }
         return false
+    }
+
+    fun loadArenas() {
+        val fx = File(PluginManager.blockParty.dataFolder, "arenas.yml")
+        if (!fx.exists()) {
+            PluginManager.blockParty.saveResource("arenas.yml", true)
+        }
+
+        arenasFile = YamlConfiguration.loadConfiguration(fx)
+        val arenasList = arenasFile.getList("arenas") as? List<Map<String, Any>> ?: return
+
+        clear()
+
+        for (value in arenasList) {
+            try {
+                add(Arena.deserialize(value))
+            } catch (e: Exception) {
+                Bukkit.getLogger().severe("Ошибка при загрузке зон: ${e.message}")
+                break
+            }
+        }
+    }
+
+    fun saveArenas() {
+        val fx = File(PluginManager.blockParty.dataFolder, "arenas.yml")
+
+        arenasFile.set("arenas", arenas.values.map {
+                value -> value.serialize()
+        })
+
+        try {
+            arenasFile.save(fx)
+        } catch (e: IOException) {
+            Bukkit.getLogger().severe("Ошибка при сохранении зон: ${e.message}")
+        }
     }
 }

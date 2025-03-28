@@ -19,8 +19,12 @@ object Config {
     val TIME_BETWEEN_ROUNDS: Int
 
     init {
-        val configFile = File(BlockPartyPlugin.instance.dataFolder, "config.yml")
+        val configFile = File(PluginManager.blockParty.dataFolder, "config.yml")
+        if (!configFile.exists()) {
+            PluginManager.blockParty.saveResource("config.yml", true)
+        }
         val config = YamlConfiguration.loadConfiguration(configFile)
+
         MAX_PLAYERS_IN_GAME = config.getInt("MAX_PLAYERS_IN_GAME", 12)
         MAX_ROUND_TIME = config.getInt("MAX_ROUND_TIME", 10)
         MIN_ROUND_TIME = config.getInt("MIN_ROUND_TIME", 2)
