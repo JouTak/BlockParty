@@ -1,9 +1,8 @@
 package ru.joutak.blockparty.arenas
 
-import org.bukkit.Bukkit
-import org.bukkit.Difficulty
-import org.bukkit.GameMode
-import org.bukkit.Location
+import org.bukkit.*
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Firework
 import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.utils.PluginManager
 
@@ -64,14 +63,22 @@ data class Arena(
     }
 
     fun reset() {
-        val worldManager = PluginManager.multiverseCore.mvWorldManager
-        val mvWorld = worldManager.getMVWorld(worldName)
+        val world = Bukkit.getWorld(worldName)!!
+        val mvWorld = PluginManager.multiverseCore.mvWorldManager.getMVWorld(worldName)
+
         mvWorld.setTime("day")
         mvWorld.setEnableWeather(false)
         mvWorld.setDifficulty(Difficulty.PEACEFUL)
         mvWorld.setGameMode(GameMode.ADVENTURE)
         mvWorld.setPVPMode(false)
-        mvWorld.setHunger(false)
+        mvWorld.hunger = false
+
+        world.setGameRule(GameRule.FALL_DAMAGE, false)
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, false)
+
         setState(ArenaState.READY)
     }
 

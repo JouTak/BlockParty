@@ -2,10 +2,7 @@ package ru.joutak.blockparty.utils
 
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.LinearComponents
-import org.bukkit.Bukkit
-import org.bukkit.Difficulty
-import org.bukkit.GameMode
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.arenas.ArenaManager
@@ -28,12 +25,19 @@ object LobbyManager {
         val worldManager = PluginManager.multiverseCore.mvWorldManager
         worldManager.setFirstSpawnWorld(world.name)
         val mvWorld = worldManager.getMVWorld(world)
+
         mvWorld.setTime("day")
         mvWorld.setEnableWeather(false)
         mvWorld.setDifficulty(Difficulty.PEACEFUL)
         mvWorld.setGameMode(GameMode.ADVENTURE)
         mvWorld.setPVPMode(false)
-        mvWorld.setHunger(false)
+        mvWorld.hunger = false
+
+        world.setGameRule(GameRule.FALL_DAMAGE, false)
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, false)
     }
 
     fun addPlayer(player: Player) {
@@ -60,7 +64,7 @@ object LobbyManager {
     fun check() {
 //        Bukkit.getLogger().info("${world.playerCount} в лобби")
 //        Bukkit.getLogger().info("${Config.PLAYERS_TO_START} needed")
-        Bukkit.getLogger().info("count: ${players.count()}, ready arena: ${ArenaManager.hasReadyArena()}, game task: ${gameStartTask}")
+//        Bukkit.getLogger().info("count: ${players.count()}, ready arena: ${ArenaManager.hasReadyArena()}, game task: ${gameStartTask}")
         if (players.count() >= Config.PLAYERS_TO_START && ArenaManager.hasReadyArena() && gameStartTask == null) {
 //            val game = GameManager.prepareGame(players.slice(0..<Config.PLAYERS_TO_START))
             Bukkit.getServer().broadcast(LinearComponents.linear(text("Игра начнется через ${Config.TIME_TO_START_GAME_LOBBY} секунд!")))
