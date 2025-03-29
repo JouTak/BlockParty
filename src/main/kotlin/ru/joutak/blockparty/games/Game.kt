@@ -51,7 +51,7 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
             val playerData = PlayerData.get(playerUuid)
             playerData.games.add(this.gameUuid)
             playerData.currentArena = this.arena
-            playerData.playerState = PlayerState.INGAME
+            playerData.state = PlayerState.INGAME
 
             Bukkit.getPlayer(playerUuid)?.let {
                 LobbyManager.removePlayer(it)
@@ -138,9 +138,7 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
             Bukkit.broadcastMessage("Игра окончена!")
 
             for (winner in winners) {
-                Bukkit.broadcastMessage("Победитель: ${Bukkit.getPlayer(winner)!!.name}!")
-                val playerData = PlayerData.get(winner)
-                playerData.hasWon = true
+                PlayerData.get(winner).hasWon = true
             }
 
             phase = GamePhase.FINISH
@@ -160,15 +158,10 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
         Bukkit.getScheduler().cancelTask(gameTaskId)
         saveGame()
         arena.reset()
-        for (player in players) {
-            val playerData = PlayerData.get(player)
-            playerData.currentArena = null
-            playerData.playerState = PlayerState.LOBBY
+        for (playerUuid in players) {
+            PlayerData.resetGame(playerUuid)
 
-            Bukkit.getPlayer(player)?.let {
-                it.inventory.clear()
-                it.level = 0
-                it.exp = 0.0f
+            Bukkit.getPlayer(playerUuid)?.let {
                 gameScoreboard.removeFor(it)
                 LobbyManager.addPlayer(it)
             }

@@ -11,7 +11,7 @@ import java.util.*
 
 data class PlayerData(
     val playerUuid: UUID,
-    var playerState: PlayerState,
+    var state: PlayerState,
     var currentArena: Arena?,
     val games: MutableList<UUID> = mutableListOf<UUID>(),
     var hasWon: Boolean = false
@@ -43,8 +43,15 @@ data class PlayerData(
         fun resetGame(playerUuid: UUID) {
             val playerData = get(playerUuid)
 
-            playerData.playerState = PlayerState.LOBBY
+            playerData.state = PlayerState.LOBBY
             playerData.currentArena = null
+
+            val player = Bukkit.getPlayer(playerData.playerUuid) ?: return
+            player.health = 20.0
+            player.foodLevel = 20
+            player.inventory.clear()
+            player.level = 0
+            player.exp = 0.0f
         }
 
         fun contains(playerUuid: UUID): Boolean {
@@ -93,7 +100,7 @@ data class PlayerData(
     }
 
     fun isInGame() : Boolean {
-        return currentArena != null && playerState != PlayerState.LOBBY
+        return currentArena != null && state != PlayerState.LOBBY
     }
 
     fun saveData() {

@@ -11,10 +11,7 @@ object LobbyListener : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
-
-        player.setHealth(20.0)
-        player.setFoodLevel(20)
-
+        PlayerData.resetGame(player.uniqueId)
         LobbyManager.addPlayer(player)
         PlayerData.resetGame(player.uniqueId)
     }

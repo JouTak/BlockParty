@@ -11,7 +11,9 @@ object GameManager {
 
     fun startGame() {
         val arena = ArenaManager.getReadyArena()!!
-        val players = LobbyManager.getPlayers().slice(0..<min(LobbyManager.getPlayers().size, Config.MAX_PLAYERS_IN_GAME))
+        val players =
+            LobbyManager.getPlayers().slice(0..<min(LobbyManager.getPlayers().size, Config.MAX_PLAYERS_IN_GAME))
+                .toMutableList()
         val game = Game(arena, players)
 
         games[game.gameUuid] = game
