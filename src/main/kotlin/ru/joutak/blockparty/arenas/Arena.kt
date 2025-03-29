@@ -5,6 +5,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.utils.PluginManager
+import kotlin.random.Random
 
 data class Arena(
     val name: String,
@@ -15,6 +16,12 @@ data class Arena(
     private var state = ArenaState.READY
     private var currentFloorId: Int = -1
     val center = Location(Bukkit.getWorld(worldName), (x1 + x2) / 2, y1 + 2, (z1 + z2) / 2)
+    val corners = listOf(
+        Location(Bukkit.getWorld(worldName), x1, y1 + 2, z1),
+        Location(Bukkit.getWorld(worldName), x1, y1 + 2, z2),
+        Location(Bukkit.getWorld(worldName), x2, y1 + 2, z2),
+        Location(Bukkit.getWorld(worldName), x2, y1 + 2, z1),
+    )
     private val threshold = 2
 
     init {
@@ -54,6 +61,29 @@ data class Arena(
             throw IllegalArgumentException("Неверный floorId: $floorId (макс. допустимое значение ${Config.NUMBER_OF_FLOORS - 1})")
 
         this.currentFloorId = floorId
+    }
+
+    fun launchFireworksAtCorners(amount: Int = 1) {
+        val world = Bukkit.getWorld(worldName)!!
+        for (corner in corners) {
+            for (i in 0..amount) {
+                val firework = world.spawnEntity(corner, EntityType.FIREWORK) as Firework
+                val meta = firework.fireworkMeta
+
+                meta.addEffect(
+                    FireworkEffect.builder()
+                        .withColor(Color.fromRGB(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
+                        .withFade(Color.WHITE)
+                        .with(FireworkEffect.Type.BURST)
+//                        .trail(true)
+//                        .flicker(true)
+                        .build()
+                )
+
+                meta.power = 1
+                firework.fireworkMeta = meta
+            }
+        }
     }
 
     fun isInside(playerLoc: Location): Boolean {

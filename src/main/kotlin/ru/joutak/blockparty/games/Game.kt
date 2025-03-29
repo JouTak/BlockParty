@@ -1,5 +1,10 @@
 package ru.joutak.blockparty.games
 
+import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.LinearComponents
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
@@ -9,24 +14,28 @@ import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaState
 import ru.joutak.blockparty.arenas.Floors
-import ru.joutak.blockparty.utils.PluginManager
+import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
 import ru.joutak.blockparty.utils.LobbyManager
+import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 import java.io.IOException
-import java.util.UUID
+import java.util.*
 
-class Game (val arena: Arena, val players: List<UUID>) : Runnable {
-    val gameUuid = UUID.randomUUID()
-    val winners = mutableSetOf<UUID>()
+
+class Game(private val arena: Arena, private val players: MutableList<UUID>) : Runnable {
+    val gameUuid: UUID = UUID.randomUUID()
+    private val winners = mutableSetOf<UUID>()
     private var round = 1
-    private var phase = GamePhase.WAIT
+    private var phase = GamePhase.ROUND_START
     private var totalTime = 0
     private var timeLeft = 0
     private var currentBlock: Material? = null
     private val gameScoreboard: GameScoreboard = GameScoreboard()
     private var gameTaskId: Int = -1
+    private var audience: Audience = Audience.empty()
+    private var isMusicPlaying: Boolean = false
 
 
     companion object {
@@ -43,9 +52,10 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
     fun start() {
         arena.reset()
         arena.setState(ArenaState.INGAME)
-        phase = GamePhase.WAIT
+        phase = GamePhase.ROUND_START
         round = 1
         arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
+        audience = Audience.audience(players.mapNotNull { Bukkit.getPlayer(it) })
 
         for (playerUuid in players) {
             val playerData = PlayerData.get(playerUuid)
@@ -70,10 +80,28 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
 
     override fun run() {
         gameScoreboard.update(getPlayers(checkRemainingPlayers).size, round)
-        gameScoreboard.setXpBarTimer(getPlayers(checkRemainingPlayers), timeLeft, totalTime)
+        gameScoreboard.setBossBarTimer(players, phase, timeLeft, totalTime)
 
         when (phase) {
-            GamePhase.WAIT -> startNewRound()
+            GamePhase.ROUND_START -> {
+                if (!isMusicPlaying) {
+                    MusicManager.playFor(players)
+                    isMusicPlaying = true
+                }
+            }
+
+            GamePhase.BREAK_FLOOR, GamePhase.CHECK_PLAYERS, GamePhase.FINISH -> {
+                if (isMusicPlaying) {
+                    MusicManager.stopFor(players)
+                    isMusicPlaying = false
+                }
+            }
+
+            else -> {}
+        }
+
+        when (phase) {
+            GamePhase.ROUND_START -> startNewRound()
             GamePhase.CHOOSE_BLOCK -> chooseBlock()
             GamePhase.COUNTDOWN -> countdown()
             GamePhase.BREAK_FLOOR -> breakFloor()
@@ -83,10 +111,22 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
     }
 
     private fun startNewRound() {
-        Bukkit.broadcastMessage("Раунд $round начинается!")
+        audience.showTitle(
+            Title.title(
+                LinearComponents.linear(
+                    Component.text("Раунд $round", NamedTextColor.NAMES.values().random())
+                ),
+                LinearComponents.linear()
+            )
+        )
+
         arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
         phase = GamePhase.CHOOSE_BLOCK
-        setTime(5)
+
+        if (round == 1)
+            setTime(Config.TIME_BETWEEN_ROUNDS)
+        else
+            setTime(5)
     }
 
     private fun chooseBlock() {
@@ -96,14 +136,14 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
         }
 
         currentBlock = Floors.getRandomBlock(arena.getCurrentFloorId())
-        Bukkit.broadcastMessage("Найдите блок цвета: ${currentBlock!!.name}")
+//        Bukkit.broadcastMessage("Найдите блок цвета: ${currentBlock!!.name}")
 
-        val item = ItemStack(currentBlock!!, 1) // Создаем предмет (1 блок)
+        val item = ItemStack(currentBlock!!, 1)
 
         for (player in players) {
             val inventory = Bukkit.getPlayer(player)?.inventory ?: continue
             inventory.clear()
-            inventory.addItem(item) // Добавляем блок в инвентарь
+            inventory.addItem(item)
         }
 
         phase = GamePhase.COUNTDOWN
@@ -122,8 +162,8 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
     private fun breakFloor() {
         Floors.removeBlocksExcept(arena, currentBlock!!)
 
-        for (player in players) {
-            val inventory = Bukkit.getPlayer(player)?.inventory ?: continue
+        for (playerUuid in players) {
+            val inventory = Bukkit.getPlayer(playerUuid)?.inventory ?: continue
             inventory.clear()
         }
 
@@ -135,7 +175,15 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
             arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
             winners.addAll(getPlayers(checkRemainingPlayers))
 
-            Bukkit.broadcastMessage("Игра окончена!")
+            val winnersAudience = Audience.audience(winners.mapNotNull { Bukkit.getPlayer(it) })
+            winnersAudience.showTitle(
+                Title.title(
+                    LinearComponents.linear(
+                        Component.text("Вы победили! :)", NamedTextColor.GREEN)
+                    ),
+                    LinearComponents.linear()
+                )
+            )
 
             for (winner in winners) {
                 PlayerData.get(winner).hasWon = true
@@ -143,14 +191,15 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
 
             phase = GamePhase.FINISH
             setTime(Config.TIME_BETWEEN_ROUNDS)
-        } else {
+        } else if (phase == GamePhase.CHECK_PLAYERS) {
             round++
-            phase = GamePhase.WAIT
+            phase = GamePhase.ROUND_START
         }
     }
 
     private fun finish() {
         if (timeLeft > 0) {
+            arena.launchFireworksAtCorners()
             timeLeft--
             return
         }
@@ -182,6 +231,11 @@ class Game (val arena: Arena, val players: List<UUID>) : Runnable {
 
     private fun getPlayers(checker: (UUID) -> Boolean): List<UUID> {
         return players.filter { playerUuid -> checker(playerUuid) } // .also { players -> Bukkit.getLogger().info(players.toString()) }
+    }
+
+    fun removePlayer(playerUuid: UUID) {
+        players.remove(playerUuid)
+        winners.remove(playerUuid)
     }
 
     fun saveGame() {

@@ -1,5 +1,6 @@
 package ru.joutak.blockparty.games
 
+import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.LinearComponents
 import net.kyori.adventure.text.format.NamedTextColor
@@ -14,6 +15,7 @@ import java.util.*
 class GameScoreboard {
     private val manager: ScoreboardManager = Bukkit.getScoreboardManager()
     private val scoreboard: Scoreboard = manager.newScoreboard
+    private var bossBar: BossBar? = null
     private val objective = scoreboard.registerNewObjective("game", Criteria.DUMMY, LinearComponents.linear(
         Component.text("B", NamedTextColor.RED),
         Component.text("l", NamedTextColor.GOLD),
@@ -38,22 +40,34 @@ class GameScoreboard {
         objective.getScore("Оставшиеся игроки:").score = playersLeft
     }
 
-    fun setXpBarTimer(playersUuids: List<UUID>, timeLeft: Int, totalTime: Int) {
+    fun setBossBarTimer(playersUuids: List<UUID>, phase: GamePhase, timeLeft: Int, totalTime: Int) {
+        val newBossBar: BossBar? = when (phase) {
+            GamePhase.ROUND_START,
+            GamePhase.BREAK_FLOOR,
+            GamePhase.CHECK_PLAYERS -> null
+
+            GamePhase.CHOOSE_BLOCK,
+            GamePhase.COUNTDOWN,
+            GamePhase.FINISH -> BossBar.bossBar(
+                LinearComponents.linear(
+                    Component.text(phase.toString()),
+                    Component.text(": $timeLeft сек.")
+                ),
+                timeLeft.toFloat() / totalTime.toFloat(),
+                BossBar.Color.WHITE,
+                BossBar.Overlay.PROGRESS
+            )
+        }
+
         for (playerUuid in playersUuids) {
             val player = Bukkit.getPlayer(playerUuid) ?: continue
-            setXpBarTimer(player, timeLeft, totalTime)
-        }
-    }
+            if (bossBar != null)
+                player.hideBossBar(bossBar!!)
 
-    fun setXpBarTimer(player: Player, timeLeft: Int, totalTime: Int) {
-        if (timeLeft <= 0 || !player.isOnline) {
-            player.exp = 0.0f
-            player.level = 0
-            return
+            if (newBossBar != null)
+                player.showBossBar(newBossBar)
         }
-
-        player.exp = timeLeft.toFloat() / totalTime.toFloat()
-        player.level = timeLeft
+        bossBar = newBossBar
     }
 
     fun setFor(player: Player) {
@@ -62,5 +76,6 @@ class GameScoreboard {
 
     fun removeFor(player: Player) {
         player.scoreboard = manager.newScoreboard
+        player.hideBossBar(bossBar ?: return)
     }
 }
