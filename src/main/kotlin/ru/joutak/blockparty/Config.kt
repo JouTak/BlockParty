@@ -21,13 +21,13 @@ object Config {
         }
         val config = YamlConfiguration.loadConfiguration(configFile)
 
-        MAX_PLAYERS_IN_GAME = config.getInt("MAX_PLAYERS_IN_GAME", 12)
-        MAX_ROUND_TIME = config.getInt("MAX_ROUND_TIME", 10)
-        MIN_ROUND_TIME = config.getInt("MIN_ROUND_TIME", 2)
-        NUMBER_OF_FLOORS = config.getInt("NUMBER_OF_FLOORS", 1)
-        PLAYERS_TO_START = config.getInt("PLAYERS_TO_START", 10)
-        PLAYERS_TO_END = config.getInt("PLAYERS_TO_END", 4)
-        TIME_TO_START_GAME_LOBBY = config.getInt("TIME_TO_START_GAME_LOBBY", 30)
-        TIME_BETWEEN_ROUNDS = config.getInt("TIME_BETWEEN_ROUNDS", 10)
+        MAX_PLAYERS_IN_GAME = config.getInt("MAX_PLAYERS_IN_GAME")
+        MAX_ROUND_TIME = config.getInt("MAX_ROUND_TIME")
+        MIN_ROUND_TIME = config.getInt("MIN_ROUND_TIME")
+        NUMBER_OF_FLOORS = config.getInt("NUMBER_OF_FLOORS")
+        PLAYERS_TO_START = config.getInt("PLAYERS_TO_START")
+        PLAYERS_TO_END = config.getInt("PLAYERS_TO_END")
+        TIME_TO_START_GAME_LOBBY = config.getInt("TIME_TO_START_GAME_LOBBY")
+        TIME_BETWEEN_ROUNDS = config.getInt("TIME_BETWEEN_ROUNDS")
     }
 }
