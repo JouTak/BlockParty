@@ -27,13 +27,10 @@ data class PlayerData(
 
         fun get(playerUuid: UUID): PlayerData {
             if (playerDatas.containsKey(playerUuid)) {
-//                Bukkit.getLogger().info("Я в первом условии $playerUuid")
                 return playerDatas[playerUuid]!!
             } else if (containsInFolder(playerUuid)) {
-//                Bukkit.getLogger().info("Я во втором условии $playerUuid")
                 loadFromFile(playerUuid)
             } else {
-//                Bukkit.getLogger().info("Я в третьем условии $playerUuid")
                 create(playerUuid)
             }
 
@@ -61,8 +58,7 @@ data class PlayerData(
         private fun containsInFolder(playerUuid: UUID): Boolean {
             val files = dataFolder.listFiles() ?: return false
             for (file in files) {
-                Bukkit.getLogger().info(playerUuid.toString() + "check")
-                if (file.isFile && file.name.equals(playerUuid.toString())) {
+                if (file.isFile && file.name.equals("$playerUuid.yml")) {
                     return true
                 }
             }
@@ -70,7 +66,7 @@ data class PlayerData(
         }
 
         private fun loadFromFile(playerUuid: UUID) {
-            val fx = File(dataFolder, playerUuid.toString())
+            val fx = File(dataFolder, "$playerUuid.yml")
             if (!fx.exists()) {
                 throw FileNotFoundException()
             }
@@ -80,12 +76,12 @@ data class PlayerData(
             try {
                 playerDatas[playerUuid] = deserialize(dataFile.getValues(true))
             } catch (e: Exception) {
-                Bukkit.getLogger().severe("Ошибка при загрузке информации о игроке: ${e.message}")
+                PluginManager.getLogger().severe("Ошибка при загрузке информации о игроке: ${e.message}")
             }
         }
 
         fun deserialize(values: Map<String, Any>): PlayerData {
-            Bukkit.getLogger().info("Deserializing player data of ${values["playerUuid"]}")
+            PluginManager.getLogger().info("Десериализация информации об игроке ${values["playerUuid"]}")
             val uuid = UUID.fromString(values["playerUuid"] as String)
 
             playerDatas[uuid] = PlayerData(
@@ -100,11 +96,11 @@ data class PlayerData(
     }
 
     fun isInGame() : Boolean {
-        return currentArena != null && state != PlayerState.LOBBY
+        return currentArena != null && state == PlayerState.INGAME
     }
 
     fun saveData() {
-        val file = File(dataFolder, this.playerUuid.toString())
+        val file = File(dataFolder, "${this.playerUuid}.yml")
         val playerData = YamlConfiguration()
 
         for ((path, value) in get(this.playerUuid).serialize()) {
@@ -114,7 +110,7 @@ data class PlayerData(
         try {
             playerData.save(file)
         } catch (e: IOException) {
-            Bukkit.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
+            PluginManager.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
         }
     }
 

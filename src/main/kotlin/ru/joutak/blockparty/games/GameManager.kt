@@ -9,20 +9,23 @@ import kotlin.math.min
 object GameManager {
     private val games = mutableMapOf<UUID, Game>()
 
-    fun startGame() {
+    fun createNewGame(): Game {
         val arena = ArenaManager.getReadyArena()!!
-        val players =
-            LobbyManager.getPlayers().slice(0..<min(LobbyManager.getPlayers().size, Config.MAX_PLAYERS_IN_GAME))
-                .toMutableList()
+        val players = LobbyManager.getReadyPlayers()
+            .slice(0..<min(LobbyManager.getReadyPlayers().size, Config.MAX_PLAYERS_IN_GAME))
+            .toMutableList()
         val game = Game(arena, players)
 
-        games[game.gameUuid] = game
-        LobbyManager.resetTask()
+        games[game.uuid] = game
 
-        game.start()
+        return game
     }
 
-    fun get(gameUuid: UUID): Game? {
+    fun get(gameUuid: UUID?): Game? {
         return games[gameUuid]
+    }
+
+    fun remove(gameUuid: UUID) {
+        games.remove(gameUuid)
     }
 }

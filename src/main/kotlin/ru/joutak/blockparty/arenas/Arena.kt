@@ -30,7 +30,7 @@ data class Arena(
 
     companion object {
         fun deserialize(values: Map<String, Any>): Arena {
-            Bukkit.getLogger().info("Deserializing arena ${values["name"]}")
+            PluginManager.getLogger().info("Десериализация информации об арене ${values["name"]}")
             return Arena(
                 values["name"] as String,
                 values["worldName"] as String,

@@ -1,6 +1,5 @@
 package ru.joutak.blockparty.arenas
 
-import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
@@ -70,7 +69,7 @@ object ArenaManager {
             try {
                 add(Arena.deserialize(value))
             } catch (e: Exception) {
-                Bukkit.getLogger().severe("Ошибка при загрузке зон: ${e.message}")
+                PluginManager.getLogger().severe("Ошибка при загрузке зон: ${e.message}")
                 break
             }
         }
@@ -86,7 +85,7 @@ object ArenaManager {
         try {
             arenasFile.save(fx)
         } catch (e: IOException) {
-            Bukkit.getLogger().severe("Ошибка при сохранении зон: ${e.message}")
+            PluginManager.getLogger().severe("Ошибка при сохранении зон: ${e.message}")
         }
     }
 }

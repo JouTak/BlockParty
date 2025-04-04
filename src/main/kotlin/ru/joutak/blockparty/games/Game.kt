@@ -8,7 +8,6 @@ import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
 import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.arenas.Arena
@@ -19,34 +18,27 @@ import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
 import ru.joutak.blockparty.utils.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
-import java.io.File
-import java.io.IOException
 import java.util.*
 
 
 class Game(private val arena: Arena, private val players: MutableList<UUID>) : Runnable {
-    val gameUuid: UUID = UUID.randomUUID()
+    val uuid: UUID = UUID.randomUUID()
+    private val scoreboard: GameScoreboard = GameScoreboard()
+    private val logger: GameLogger = GameLogger(this)
+    private val onlinePlayers = mutableSetOf<UUID>()
     private val winners = mutableSetOf<UUID>()
     private var round = 1
     private var phase = GamePhase.ROUND_START
     private var totalTime = 0
     private var timeLeft = 0
     private var currentBlock: Material? = null
-    private val gameScoreboard: GameScoreboard = GameScoreboard()
-    private var gameTaskId: Int = -1
-    private var audience: Audience = Audience.empty()
+    private var taskId: Int = -1
     private var isMusicPlaying: Boolean = false
 
-
     companion object {
-        val dataFolder = File(PluginManager.blockParty.dataFolder.path + "/games")
-
         val checkRemainingPlayers = {playerUuid : UUID -> if (Bukkit.getPlayer(playerUuid) == null) false
-                                                            else Bukkit.getPlayer(playerUuid)!!.gameMode == GameMode.ADVENTURE }
-    }
-
-    fun getPhase(): GamePhase {
-        return this.phase
+        else PlayerData.get(playerUuid).isInGame() && Bukkit.getPlayer(playerUuid)!!.gameMode == GameMode.ADVENTURE
+        }
     }
 
     fun start() {
@@ -55,22 +47,23 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         phase = GamePhase.ROUND_START
         round = 1
         arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
-        audience = Audience.audience(players.mapNotNull { Bukkit.getPlayer(it) })
 
         for (playerUuid in players) {
             val playerData = PlayerData.get(playerUuid)
-            playerData.games.add(this.gameUuid)
+            playerData.games.add(this.uuid)
             playerData.currentArena = this.arena
             playerData.state = PlayerState.INGAME
-
+            onlinePlayers.add(playerUuid)
             Bukkit.getPlayer(playerUuid)?.let {
-                LobbyManager.removePlayer(it)
                 PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
-                gameScoreboard.setFor(it)
+                LobbyManager.removePlayer(it)
+                scoreboard.setFor(it)
             }
         }
 
-        gameTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
+        logger.info("Игра началась в составе из ${players.size} игроков:\n${players.joinToString("\n")}")
+
+        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
             PluginManager.blockParty,
             this,
             0L,
@@ -79,8 +72,8 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
     }
 
     override fun run() {
-        gameScoreboard.update(getPlayers(checkRemainingPlayers).size, round)
-        gameScoreboard.setBossBarTimer(players, phase, timeLeft, totalTime)
+        scoreboard.update(getPlayers(checkRemainingPlayers).size, round)
+        scoreboard.setBossBarTimer(onlinePlayers, phase, timeLeft, totalTime)
 
         when (phase) {
             GamePhase.ROUND_START -> {
@@ -111,7 +104,9 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
     }
 
     private fun startNewRound() {
-        audience.showTitle(
+        logger.info("Раунд $round начался")
+
+        Audience.audience(onlinePlayers.mapNotNull { Bukkit.getPlayer(it) }).showTitle(
             Title.title(
                 LinearComponents.linear(
                     Component.text("Раунд $round", NamedTextColor.NAMES.values().random())
@@ -136,21 +131,24 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         }
 
         currentBlock = Floors.getRandomBlock(arena.getCurrentFloorId())
-//        Bukkit.broadcastMessage("Найдите блок цвета: ${currentBlock!!.name}")
 
         val item = ItemStack(currentBlock!!, 1)
 
-        for (player in players) {
+        for (player in onlinePlayers) {
             val inventory = Bukkit.getPlayer(player)?.inventory ?: continue
             inventory.clear()
             inventory.addItem(item)
         }
+
+        logger.info("$currentBlock выбран в раунде $round")
 
         phase = GamePhase.COUNTDOWN
         setTime(calculateRoundTime())
     }
 
     private fun countdown() {
+        logger.info("$timeLeft секунд до разрушения пола")
+
         if (timeLeft > 0) {
             timeLeft--
             return
@@ -160,9 +158,10 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
     }
 
     private fun breakFloor() {
+        logger.info("Пол разрушился")
         Floors.removeBlocksExcept(arena, currentBlock!!)
 
-        for (playerUuid in players) {
+        for (playerUuid in onlinePlayers) {
             val inventory = Bukkit.getPlayer(playerUuid)?.inventory ?: continue
             inventory.clear()
         }
@@ -170,7 +169,36 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         phase = GamePhase.CHECK_PLAYERS
     }
 
+    fun knockout(playerUuid: UUID) {
+        logger.info("Игрок $playerUuid выбыл из игры!")
+
+        val player = Bukkit.getPlayer(playerUuid) ?: return
+
+        Audience.audience(player).showTitle(
+            Title.title(
+                LinearComponents.linear(
+                    Component.text("Вы проиграли! :(", NamedTextColor.RED)
+                ),
+                LinearComponents.linear()
+            )
+        )
+
+        player.gameMode = GameMode.SPECTATOR
+        player.teleport(arena.center)
+
+        if (getPhase() != GamePhase.FINISH)
+            checkPlayers()
+    }
+
     fun checkPlayers() {
+        for (playerUuid in onlinePlayers.filter { !PlayerData.get(it).isInGame() }) {
+            logger.info("Игрок $playerUuid вышел из игры!")
+            Bukkit.getPlayer(playerUuid)?.let {
+                scoreboard.removeFor(it)
+            }
+            onlinePlayers.remove(playerUuid)
+        }
+
         if (getPlayers(checkRemainingPlayers).size <= Config.PLAYERS_TO_END) {
             arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
             winners.addAll(getPlayers(checkRemainingPlayers))
@@ -185,6 +213,8 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
                 )
             )
 
+            logger.info("Победителями стали:\n${winners.joinToString("\n")}")
+            logger.addWinners(winners)
             for (winner in winners) {
                 PlayerData.get(winner).hasWon = true
             }
@@ -203,23 +233,27 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
             timeLeft--
             return
         }
+        Bukkit.getScheduler().cancelTask(taskId)
+        logger.saveGameResults()
 
-        Bukkit.getScheduler().cancelTask(gameTaskId)
-        saveGame()
         arena.reset()
-        for (playerUuid in players) {
+        for (playerUuid in onlinePlayers) {
             PlayerData.resetGame(playerUuid)
 
             Bukkit.getPlayer(playerUuid)?.let {
-                gameScoreboard.removeFor(it)
+                scoreboard.removeFor(it)
                 LobbyManager.addPlayer(it)
             }
         }
+
+        logger.info("Игра завершилась")
+
+        GameManager.remove(uuid)
     }
 
     private fun setTime(time: Int) {
         totalTime = time
-        timeLeft = time
+        timeLeft = time - 1
     }
 
     private fun calculateRoundTime() : Int {
@@ -230,32 +264,16 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
     }
 
     private fun getPlayers(checker: (UUID) -> Boolean): List<UUID> {
-        return players.filter { playerUuid -> checker(playerUuid) } // .also { players -> Bukkit.getLogger().info(players.toString()) }
+        return onlinePlayers.filter { playerUuid -> checker(playerUuid) } // .also { players -> PluginManager.getLogger().info(players.toString()) }
     }
 
-    fun removePlayer(playerUuid: UUID) {
-        players.remove(playerUuid)
-        winners.remove(playerUuid)
-    }
-
-    fun saveGame() {
-        val file = File(dataFolder, this.gameUuid.toString())
-        val gameData = YamlConfiguration()
-
-        for ((path, value) in this.serialize()) {
-            gameData.set(path, value)
-        }
-
-        try {
-            gameData.save(file)
-        } catch (e: IOException) {
-            Bukkit.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
-        }
+    fun getPhase(): GamePhase {
+        return this.phase
     }
 
     fun serialize(): Map<String, Any> {
         return mapOf(
-            "gameUuid" to this.gameUuid.toString(),
+            "gameUuid" to this.uuid.toString(),
             "arena" to this.arena.name,
             "players" to this.players.map { it.toString() },
             "winners" to this.winners.map { it.toString() },
