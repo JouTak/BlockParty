@@ -8,6 +8,11 @@ import ru.joutak.blockparty.arenas.ArenaManager
 
 object BlockPartyCreateCommand : BlockPartyCommand("create", listOf<String>("name", "x1", "y1", "z1", "x2", "y2", "z2")) {
     override fun execute(sender: CommandSender, command: Command, string: String, args: Array<out String>): Boolean {
+        if (!sender.isOp) {
+            sender.sendMessage("Недостаточно прав для использования данной команды.")
+            return true
+        }
+
         if (sender !is Player) {
             sender.sendMessage("Данную команду можно использовать только в игре.")
             return true
@@ -47,7 +52,7 @@ object BlockPartyCreateCommand : BlockPartyCommand("create", listOf<String>("nam
     }
 
     override fun getTabHint(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        if (sender !is Player)
+        if (sender !is Player || !sender.isOp)
             return emptyList()
 
         return when (args.size) {

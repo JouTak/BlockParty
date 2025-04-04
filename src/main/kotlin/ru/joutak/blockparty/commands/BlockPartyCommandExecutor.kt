@@ -4,16 +4,17 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
+import org.bukkit.entity.Player
 
 object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     private val commands = mutableMapOf<String, BlockPartyCommand>()
 
     init {
-        registerCommand(BlockPartyStartCommand)
         registerCommand(BlockPartyCreateCommand)
         registerCommand(BlockPartyRemoveCommand)
         registerCommand(BlockPartyInfoCommand)
         registerCommand(BlockPartyListCommand)
+        registerCommand(BlockPartyReadyCommand)
     }
 
     private fun registerCommand(command : BlockPartyCommand) {
@@ -21,9 +22,16 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, string: String, args: Array<out String>?): Boolean {
-        if (!sender.isOp) {
-            sender.sendMessage("Недостаточно прав для использования данной команды.")
-            return true
+        if (sender is Player && !sender.isOp) {
+            command.setUsage("/bp ready")
+        } else {
+            command.setUsage(
+                "/bp create <name> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
+                        "/bp remove <name>\n" +
+                        "/bp list\n" +
+                        "/bp info <name>\n" +
+                        "/bp ready"
+            )
         }
 
         if (args?.getOrNull(0) in commands.keys)
@@ -39,10 +47,13 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
         return when (args.size) {
-            1 -> commands.keys.toList()
+            1 -> {
+                if (!sender.isOp) return listOf(BlockPartyReadyCommand.name)
+                return commands.keys.toList()
+            }
             else -> {
                 if (args[0] !in commands.keys)
-                    emptyList<String>()
+                    emptyList()
                 else
                     commands[args[0]]!!.getTabHint(
                         sender,
