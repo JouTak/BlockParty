@@ -1,7 +1,7 @@
 package ru.joutak.blockparty.music
 
 import org.bukkit.Bukkit
-import ru.joutak.blockparty.players.PlayerData
+import org.bukkit.SoundCategory
 import java.util.*
 
 object MusicManager {
@@ -12,11 +12,15 @@ object MusicManager {
     }
 
     fun playFor(playerUuid: UUID) {
-        val arena = PlayerData.get(playerUuid).currentArena ?: return
-        Bukkit.getServer().dispatchCommand(
-            Bukkit.getConsoleSender(),
-            "playsound minecraft:music.bp record ${Bukkit.getPlayer(playerUuid)?.name ?: return} ${arena.center.x} ${arena.center.y} ${arena.center.z} 0.3"
-        )
+        Bukkit.getPlayer(playerUuid)?.let {
+            it.playSound(it.location, "minecraft:music.bp", SoundCategory.RECORDS, 0.25f, 1.0f)
+        }
+
+        // val arena = PlayerData.get(playerUuid).currentArena ?: return
+        // Bukkit.getServer().dispatchCommand(
+        //     Bukkit.getConsoleSender(),
+        //     "playsound minecraft:music.bp record ${Bukkit.getPlayer(playerUuid)?.name ?: return} ~ ~ ~ 0.25 1 0.25"
+        // )
     }
 
     fun stopFor(playersUuids: List<UUID>) {
@@ -26,9 +30,11 @@ object MusicManager {
     }
 
     fun stopFor(playerUuid: UUID) {
-        Bukkit.getServer().dispatchCommand(
-            Bukkit.getConsoleSender(),
-            "stopsound ${Bukkit.getPlayer(playerUuid)?.name ?: return} record minecraft:music.bp"
-        )
+        Bukkit.getPlayer(playerUuid)?.stopSound("minecraft:music.bp", SoundCategory.RECORDS)
+
+        // Bukkit.getServer().dispatchCommand(
+        //     Bukkit.getConsoleSender(),
+        //     "stopsound ${Bukkit.getPlayer(playerUuid)?.name ?: return} record minecraft:music.bp"
+        // )
     }
 }
