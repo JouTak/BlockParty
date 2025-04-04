@@ -5,6 +5,7 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 
 object Config {
+    val LOG_INFO_TO_CONSOLE: Boolean
     val MAX_PLAYERS_IN_GAME: Int
     val MAX_ROUND_TIME: Int
     val MIN_ROUND_TIME: Int
@@ -21,6 +22,7 @@ object Config {
         }
         val config = YamlConfiguration.loadConfiguration(configFile)
 
+        LOG_INFO_TO_CONSOLE = config.getBoolean("LOG_INFO_TO_CONSOLE")
         MAX_PLAYERS_IN_GAME = config.getInt("MAX_PLAYERS_IN_GAME")
         MAX_ROUND_TIME = config.getInt("MAX_ROUND_TIME")
         MIN_ROUND_TIME = config.getInt("MIN_ROUND_TIME")

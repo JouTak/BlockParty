@@ -1,6 +1,7 @@
 package ru.joutak.blockparty.games
 
 import org.bukkit.configuration.file.YamlConfiguration
+import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 import java.io.IOException
@@ -40,8 +41,8 @@ class GameLogger(val game: Game) {
         logger.addHandler(fileHandler)
     }
 
-    fun info(msg: String, toConsole: Boolean = true) {
-        logger.useParentHandlers = toConsole
+    fun info(msg: String) {
+        logger.useParentHandlers = Config.LOG_INFO_TO_CONSOLE
         logger.info(msg)
     }
 
