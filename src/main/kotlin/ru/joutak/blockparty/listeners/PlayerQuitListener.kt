@@ -9,14 +9,7 @@ import ru.joutak.blockparty.games.GamePhase
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.utils.LobbyManager
 
-object LobbyListener : Listener {
-    @EventHandler
-    fun onJoin(event: PlayerJoinEvent) {
-        val player = event.player
-        PlayerData.resetGame(player.uniqueId)
-        LobbyManager.addPlayer(player)
-    }
-
+object PlayerQuitListener : Listener {
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
