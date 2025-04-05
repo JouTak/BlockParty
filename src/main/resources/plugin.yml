@@ -7,7 +7,7 @@ commands:
   bp:
     description: BlockParty commands
     usage: |
-      /bp create <name> <x1> <y1> <z1> <x2> <y2> <z2>
+      /bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>
       /bp remove <name>
       /bp list
       /bp info <name>

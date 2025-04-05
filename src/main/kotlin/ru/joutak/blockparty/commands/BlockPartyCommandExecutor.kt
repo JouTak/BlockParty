@@ -26,7 +26,7 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
             command.setUsage("/bp ready")
         } else {
             command.setUsage(
-                "/bp create <name> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
+                "/bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
                         "/bp remove <name>\n" +
                         "/bp list\n" +
                         "/bp info <name>\n" +

@@ -1,20 +1,17 @@
 package ru.joutak.blockparty.commands
 
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaManager
 
-object BlockPartyCreateCommand : BlockPartyCommand("create", listOf<String>("name", "x1", "y1", "z1", "x2", "y2", "z2")) {
+object BlockPartyCreateCommand :
+    BlockPartyCommand("create", listOf<String>("name", "world", "x1", "y1", "z1", "x2", "y2", "z2")) {
     override fun execute(sender: CommandSender, command: Command, string: String, args: Array<out String>): Boolean {
         if (!sender.isOp) {
             sender.sendMessage("Недостаточно прав для использования данной команды.")
-            return true
-        }
-
-        if (sender !is Player) {
-            sender.sendMessage("Данную команду можно использовать только в игре.")
             return true
         }
 
@@ -23,16 +20,21 @@ object BlockPartyCreateCommand : BlockPartyCommand("create", listOf<String>("nam
         }
 
         try {
-            val x1 = minOf(args[1].toDouble(), args[4].toDouble())
-            val x2 = maxOf(args[1].toDouble(), args[4].toDouble())
-            val y1 = minOf(args[2].toDouble(), args[5].toDouble())
-            val y2 = maxOf(args[2].toDouble(), args[5].toDouble())
-            val z1 = minOf(args[3].toDouble(), args[6].toDouble())
-            val z2 = maxOf(args[3].toDouble(), args[6].toDouble())
+            if (Bukkit.getWorld(args[1]) == null) {
+                sender.sendMessage("Мира с таким именем не существует!")
+                return true
+            }
+
+            val x1 = minOf(args[2].toDouble(), args[5].toDouble())
+            val x2 = maxOf(args[2].toDouble(), args[5].toDouble())
+            val y1 = minOf(args[3].toDouble(), args[6].toDouble())
+            val y2 = maxOf(args[3].toDouble(), args[6].toDouble())
+            val z1 = minOf(args[4].toDouble(), args[7].toDouble())
+            val z2 = maxOf(args[4].toDouble(), args[7].toDouble())
 
             val newArena = Arena(
                 args[0],
-                sender.world.name,
+                args[1],
                 x1,
                 y1,
                 z1,
@@ -52,13 +54,14 @@ object BlockPartyCreateCommand : BlockPartyCommand("create", listOf<String>("nam
     }
 
     override fun getTabHint(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        if (sender !is Player || !sender.isOp)
+        if (!sender.isOp)
             return emptyList()
 
         return when (args.size) {
-            2 -> listOf(sender.location.x.toInt().toString())
-            3 -> listOf(sender.location.y.toInt().toString())
-            4 -> listOf(sender.location.z.toInt().toString())
+            2 -> Bukkit.getWorlds().map { it.name }
+            3 -> if (sender is Player) listOf(sender.location.x.toInt().toString()) else emptyList()
+            4 -> if (sender is Player) listOf(sender.location.y.toInt().toString()) else emptyList()
+            5 -> if (sender is Player) listOf(sender.location.z.toInt().toString()) else emptyList()
             else -> emptyList()
         }
     }
