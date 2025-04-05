@@ -7,7 +7,7 @@ import ru.joutak.blockparty.Config
 import kotlin.random.Random
 
 object Floors {
-    val floorsWorld = Bukkit.getWorld("floors") ?: throw NullPointerException("Мир floors не существует!")
+    val floorsWorld = Bukkit.getWorld("bp_floors") ?: throw NullPointerException("Мир bp_floors не существует!")
     val floorBlocks = mutableMapOf<Int, Set<Material>>()
 
     fun setRandomFloorAt(arena: Arena) : Int {
