@@ -24,7 +24,7 @@ class GameLogger(val game: Game) {
     private val logFile = File(gameFolder, "${game.uuid}.log")
 
     init {
-        gameFolder.mkdir()
+        gameFolder.mkdirs()
         winnersFile.createNewFile()
         resultFile.createNewFile()
         logFile.createNewFile()
