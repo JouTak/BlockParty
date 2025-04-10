@@ -22,12 +22,12 @@ object LobbyManager {
     private var gameStartTask: Int? = null
 
     init {
-        if (Bukkit.getWorld("lobby") == null) {
+        if (Bukkit.getWorld(Config.LOBBY_WORLD_NAME) == null) {
             world = Bukkit.getWorlds()[0]
             PluginManager.getLogger().warning("Отсутствует мир lobby! В качестве лобби используется мир ${world.name}.")
         }
         else
-            world = Bukkit.getWorld("lobby")!!
+            world = Bukkit.getWorld(Config.LOBBY_WORLD_NAME)!!
 
         val worldManager = PluginManager.multiverseCore.mvWorldManager
         worldManager.setFirstSpawnWorld(world.name)
