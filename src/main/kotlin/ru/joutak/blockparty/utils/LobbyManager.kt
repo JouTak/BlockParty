@@ -20,14 +20,17 @@ object LobbyManager {
     private val world: World
     private val readyPlayers = LinkedHashSet<UUID>()
     private var gameStartTask: Int? = null
+    private var timeLeft: Int = Config.TIME_TO_START_GAME_LOBBY
 
     init {
         if (Bukkit.getWorld(Config.LOBBY_WORLD_NAME) == null) {
             world = Bukkit.getWorlds()[0]
-            PluginManager.getLogger().warning("Отсутствует мир lobby! В качестве лобби используется мир ${world.name}.")
-        }
-        else
+            PluginManager.getLogger().warning(
+                "Отсутствует мир ${Config.LOBBY_WORLD_NAME}! В качестве лобби используется мир ${world.name}.",
+            )
+        } else {
             world = Bukkit.getWorld(Config.LOBBY_WORLD_NAME)!!
+        }
 
         val worldManager = PluginManager.multiverseCore.mvWorldManager
         worldManager.setFirstSpawnWorld(world.name)
@@ -54,8 +57,8 @@ object LobbyManager {
                 Component.text("Для игры в "),
                 BlockPartyPlugin.TITLE,
                 Component.text(" введите команду "),
-                Component.text("/bp ready", NamedTextColor.RED, TextDecoration.BOLD)
-            )
+                Component.text("/bp ready", NamedTextColor.RED, TextDecoration.BOLD),
+            ),
         )
     }
 
@@ -63,54 +66,45 @@ object LobbyManager {
         readyPlayers.remove(player.uniqueId)
     }
 
-    fun getReadyPlayers(): List<UUID> {
-        return readyPlayers.toList()
-    }
+    fun getReadyPlayers(): List<UUID> = readyPlayers.toList()
 
-    fun resetTask() {
-        if (gameStartTask != null)
-            Bukkit.getScheduler().cancelTask(gameStartTask!!)
-
-        gameStartTask = null
-    }
+    fun getReadyPlayersAudience(): Audience =
+        Audience.audience(
+            readyPlayers
+                .mapNotNull { Bukkit.getPlayer(it) }
+                .slice(0..<min(readyPlayers.size, Config.MAX_PLAYERS_IN_GAME)),
+        )
 
     fun check() {
-        for (player in world.players)
-            if (PlayerData.get(player.uniqueId).state == PlayerState.READY)
+        for (player in world.players) {
+            if (PlayerData.get(player.uniqueId).state == PlayerState.READY) {
                 readyPlayers.add(player.uniqueId)
-            else readyPlayers.remove(player.uniqueId)
-
-        val readyPlayersAudience = Audience.audience(readyPlayers.mapNotNull { Bukkit.getPlayer(it) }
-            .slice(0..<min(readyPlayers.size, Config.MAX_PLAYERS_IN_GAME)))
+            } else {
+                readyPlayers.remove(player.uniqueId)
+            }
+        }
 
         if (readyPlayers.count() >= Config.PLAYERS_TO_START && gameStartTask == null) {
             if (ArenaManager.hasReadyArena()) {
-                var timeLeft = Config.TIME_TO_START_GAME_LOBBY
-                gameStartTask = Bukkit.getScheduler().runTaskTimer(PluginManager.blockParty, Runnable {
-                    if (timeLeft > 0) {
-                        readyPlayersAudience.sendMessage(
-                            LinearComponents.linear(
-                                Component.text("Ваша игра начнется через "),
-                                Component.text("$timeLeft", NamedTextColor.RED),
-                                Component.text(" секунд!")
-                            )
-                        )
-                        timeLeft--
-                    } else {
-                        GameManager.createNewGame().start()
-                        resetTask()
-                    }
-                }, 0L, 20L).taskId
+                startLobbyCountdown()
             } else {
-                readyPlayersAudience.sendMessage(
+                getReadyPlayersAudience().sendMessage(
                     LinearComponents.linear(
-                        Component.text("Отсутствует свободная арена, пожалуйста, подождите...")
-                    )
+                        Component.text("Отсутствует свободная арена, пожалуйста, подождите..."),
+                    ),
                 )
             }
-        } else if (readyPlayers.count() < Config.PLAYERS_TO_START) {
+
+            return
+        }
+
+        if (readyPlayers.count() < Config.PLAYERS_TO_START) {
             if (gameStartTask != null) {
-                readyPlayersAudience.sendMessage(LinearComponents.linear(Component.text("Недостаточно игроков для начала игры!")))
+                getReadyPlayersAudience().sendMessage(
+                    LinearComponents.linear(
+                        Component.text("Недостаточно игроков для начала игры!"),
+                    ),
+                )
                 resetTask()
             }
 
@@ -118,9 +112,45 @@ object LobbyManager {
                 LinearComponents.linear(
                     Component.text("Ожидание "),
                     Component.text("${Config.PLAYERS_TO_START - readyPlayers.count()}", NamedTextColor.GOLD),
-                    Component.text(" игроков для начала игры.")
-                )
+                    Component.text(" игроков для начала игры."),
+                ),
             )
         }
+    }
+
+    private fun startLobbyCountdown() {
+        timeLeft = Config.TIME_TO_START_GAME_LOBBY
+
+        gameStartTask =
+            Bukkit
+                .getScheduler()
+                .runTaskTimer(
+                    PluginManager.blockParty,
+                    Runnable {
+                        if (timeLeft > 0) {
+                            getReadyPlayersAudience().sendMessage(
+                                LinearComponents.linear(
+                                    Component.text("Ваша игра начнется через "),
+                                    Component.text("$timeLeft", NamedTextColor.RED),
+                                    Component.text(" секунд!"),
+                                ),
+                            )
+                            timeLeft--
+                        } else {
+                            GameManager.createNewGame().start()
+                            resetTask()
+                        }
+                    },
+                    0L,
+                    20L,
+                ).taskId
+    }
+
+    fun resetTask() {
+        if (gameStartTask != null) {
+            Bukkit.getScheduler().cancelTask(gameStartTask!!)
+        }
+
+        gameStartTask = null
     }
 }

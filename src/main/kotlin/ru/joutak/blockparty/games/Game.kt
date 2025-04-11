@@ -20,8 +20,10 @@ import ru.joutak.blockparty.utils.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
 import java.util.*
 
-
-class Game(private val arena: Arena, private val players: MutableList<UUID>) : Runnable {
+class Game(
+    private val arena: Arena,
+    private val players: MutableList<UUID>,
+) : Runnable {
     val uuid: UUID = UUID.randomUUID()
     private val scoreboard: GameScoreboard = GameScoreboard()
     private val logger: GameLogger = GameLogger(this)
@@ -36,8 +38,12 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
     private var isMusicPlaying: Boolean = false
 
     companion object {
-        val checkRemainingPlayers = {playerUuid : UUID -> if (Bukkit.getPlayer(playerUuid) == null) false
-        else PlayerData.get(playerUuid).isInGame() && Bukkit.getPlayer(playerUuid)!!.gameMode == GameMode.ADVENTURE
+        val checkRemainingPlayers = { playerUuid: UUID ->
+            if (Bukkit.getPlayer(playerUuid) == null) {
+                false
+            } else {
+                PlayerData.get(playerUuid).isInGame() && Bukkit.getPlayer(playerUuid)!!.gameMode == GameMode.ADVENTURE
+            }
         }
     }
 
@@ -63,12 +69,13 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
 
         logger.info("Игра началась в составе из ${players.size} игроков:\n${players.joinToString("\n")}")
 
-        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
-            PluginManager.blockParty,
-            this,
-            0L,
-            20L
-        )
+        taskId =
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(
+                PluginManager.blockParty,
+                this,
+                0L,
+                20L,
+            )
     }
 
     override fun run() {
@@ -78,14 +85,14 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         when (phase) {
             GamePhase.ROUND_START -> {
                 if (!isMusicPlaying) {
-                    MusicManager.playFor(players)
+                    MusicManager.playFor(onlinePlayers)
                     isMusicPlaying = true
                 }
             }
 
             GamePhase.BREAK_FLOOR, GamePhase.CHECK_PLAYERS, GamePhase.FINISH -> {
                 if (isMusicPlaying) {
-                    MusicManager.stopFor(players)
+                    MusicManager.stopFor(onlinePlayers)
                     isMusicPlaying = false
                 }
             }
@@ -109,19 +116,20 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         Audience.audience(onlinePlayers.mapNotNull { Bukkit.getPlayer(it) }).showTitle(
             Title.title(
                 LinearComponents.linear(
-                    Component.text("Раунд $round", NamedTextColor.NAMES.values().random())
+                    Component.text("Раунд $round", NamedTextColor.NAMES.values().random()),
                 ),
-                LinearComponents.linear()
-            )
+                LinearComponents.linear(),
+            ),
         )
 
         arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
         phase = GamePhase.CHOOSE_BLOCK
 
-        if (round == 1)
+        if (round == 1) {
             setTime(Config.TIME_BETWEEN_ROUNDS)
-        else
+        } else {
             setTime(5)
+        }
     }
 
     private fun chooseBlock() {
@@ -177,17 +185,18 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         Audience.audience(player).showTitle(
             Title.title(
                 LinearComponents.linear(
-                    Component.text("Вы проиграли! :(", NamedTextColor.RED)
+                    Component.text("Вы проиграли! :(", NamedTextColor.RED),
                 ),
-                LinearComponents.linear()
-            )
+                LinearComponents.linear(),
+            ),
         )
 
         player.gameMode = GameMode.SPECTATOR
         player.teleport(arena.center)
 
-        if (getPhase() != GamePhase.FINISH)
+        if (getPhase() != GamePhase.FINISH) {
             checkPlayers()
+        }
     }
 
     fun checkPlayers() {
@@ -207,10 +216,10 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
             winnersAudience.showTitle(
                 Title.title(
                     LinearComponents.linear(
-                        Component.text("Вы победили! :)", NamedTextColor.GREEN)
+                        Component.text("Вы победили! :)", NamedTextColor.GREEN),
                     ),
-                    LinearComponents.linear()
-                )
+                    LinearComponents.linear(),
+                ),
             )
 
             logger.info("Победителями стали:\n${winners.joinToString("\n")}")
@@ -249,6 +258,7 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         logger.info("Игра завершилась")
 
         GameManager.remove(uuid)
+        LobbyManager.check()
     }
 
     private fun setTime(time: Int) {
@@ -256,28 +266,23 @@ class Game(private val arena: Arena, private val players: MutableList<UUID>) : R
         timeLeft = time - 1
     }
 
-    private fun calculateRoundTime() : Int {
-        return if (Config.MAX_ROUND_TIME - round < Config.MIN_ROUND_TIME)
+    private fun calculateRoundTime(): Int =
+        if (Config.MAX_ROUND_TIME - round < Config.MIN_ROUND_TIME) {
             Config.MIN_ROUND_TIME
-        else
+        } else {
             Config.MAX_ROUND_TIME - round
-    }
+        }
 
-    private fun getPlayers(checker: (UUID) -> Boolean): List<UUID> {
-        return onlinePlayers.filter { playerUuid -> checker(playerUuid) } // .also { players -> PluginManager.getLogger().info(players.toString()) }
-    }
+    private fun getPlayers(checker: (UUID) -> Boolean): List<UUID> = onlinePlayers.filter { playerUuid -> checker(playerUuid) }
 
-    fun getPhase(): GamePhase {
-        return this.phase
-    }
+    fun getPhase(): GamePhase = this.phase
 
-    fun serialize(): Map<String, Any> {
-        return mapOf(
+    fun serialize(): Map<String, Any> =
+        mapOf(
             "gameUuid" to this.uuid.toString(),
             "arena" to this.arena.name,
             "players" to this.players.map { it.toString() },
             "winners" to this.winners.map { it.toString() },
-            "rounds" to this.round
+            "rounds" to this.round,
         )
-    }
 }

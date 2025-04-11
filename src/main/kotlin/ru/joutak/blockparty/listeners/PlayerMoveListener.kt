@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import ru.joutak.blockparty.games.GameManager
+import ru.joutak.blockparty.games.GamePhase
 import ru.joutak.blockparty.players.PlayerData
 
 object PlayerMoveListener : Listener {
@@ -14,11 +15,18 @@ object PlayerMoveListener : Listener {
         val location = player.location
         val playerData = PlayerData.get(player.uniqueId)
 
-        if (!playerData.isInGame())
+        if (!playerData.isInGame()) {
             return
+        }
 
         if (!playerData.currentArena!!.isInside(location) && player.gameMode != GameMode.SPECTATOR) {
-            GameManager.get(playerData.games.lastOrNull())?.knockout(player.uniqueId)
+            val game = GameManager.get(playerData.games.lastOrNull()) ?: return
+
+            if (game.getPhase() == GamePhase.FINISH) {
+                player.teleport(playerData.currentArena!!.center)
+            } else {
+                game.knockout(player.uniqueId)
+            }
         }
     }
 }
