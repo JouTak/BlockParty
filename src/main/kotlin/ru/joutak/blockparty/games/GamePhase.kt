@@ -6,10 +6,11 @@ enum class GamePhase {
     COUNTDOWN,
     BREAK_FLOOR,
     CHECK_PLAYERS,
-    FINISH;
+    FINISH,
+    ;
 
-    override fun toString(): String {
-        return when (this) {
+    override fun toString(): String =
+        when (this) {
             ROUND_START -> "Подготовка раунда"
             CHOOSE_BLOCK -> "Выбор блока"
             COUNTDOWN -> "Найди или упади"
@@ -17,5 +18,4 @@ enum class GamePhase {
             CHECK_PLAYERS -> "Проверка игроков"
             FINISH -> "Конец игры"
         }
-    }
 }

@@ -22,10 +22,14 @@ object PlayerQuitListener : Listener {
             lastGame.checkPlayers()
         }
 
-        Bukkit.getScheduler().runTaskLater(PluginManager.blockParty, Runnable {
-            LobbyManager.removePlayer(player)
-            playerData.saveData()
-            LobbyManager.check()
-        }, 5L)
+        Bukkit.getScheduler().runTaskLater(
+            PluginManager.blockParty,
+            Runnable {
+                LobbyManager.removePlayer(player)
+                playerData.saveData()
+                LobbyManager.check()
+            },
+            5L,
+        )
     }
 }

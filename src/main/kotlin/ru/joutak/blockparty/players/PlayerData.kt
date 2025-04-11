@@ -7,20 +7,20 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.*
+import java.util.UUID
 
 data class PlayerData(
     val playerUuid: UUID,
     var state: PlayerState,
     var currentArena: Arena?,
     val games: MutableList<UUID> = mutableListOf<UUID>(),
-    var hasWon: Boolean = false
+    var hasWon: Boolean = false,
 ) {
     companion object {
         val playerDatas = mutableMapOf<UUID, PlayerData>()
         val dataFolder = File(PluginManager.blockParty.dataFolder.path + "/players")
 
-        private fun create(playerUuid: UUID) : PlayerData {
+        private fun create(playerUuid: UUID): PlayerData {
             playerDatas[playerUuid] = PlayerData(playerUuid, PlayerState.LOBBY, null)
             return playerDatas[playerUuid]!!
         }
@@ -51,9 +51,7 @@ data class PlayerData(
             player.exp = 0.0f
         }
 
-        fun contains(playerUuid: UUID): Boolean {
-            return playerDatas.containsKey(playerUuid) || containsInFolder(playerUuid)
-        }
+        fun contains(playerUuid: UUID): Boolean = playerDatas.containsKey(playerUuid) || containsInFolder(playerUuid)
 
         private fun containsInFolder(playerUuid: UUID): Boolean {
             val files = dataFolder.listFiles() ?: return false
@@ -84,20 +82,19 @@ data class PlayerData(
             PluginManager.getLogger().info("Десериализация информации об игроке ${values["playerUuid"]}")
             val uuid = UUID.fromString(values["playerUuid"] as String)
 
-            playerDatas[uuid] = PlayerData(
-                uuid,
-                PlayerState.LOBBY,
-                null,
-                (values["games"] as MutableList<String>).map { UUID.fromString(it) }.toMutableList(),
-                values["hasWon"] as Boolean
-            )
+            playerDatas[uuid] =
+                PlayerData(
+                    uuid,
+                    PlayerState.LOBBY,
+                    null,
+                    (values["games"] as MutableList<String>).map { UUID.fromString(it) }.toMutableList(),
+                    values["hasWon"] as Boolean,
+                )
             return playerDatas[uuid]!!
         }
     }
 
-    fun isInGame() : Boolean {
-        return currentArena != null && state == PlayerState.INGAME
-    }
+    fun isInGame(): Boolean = currentArena != null && state == PlayerState.INGAME
 
     fun saveData() {
         val file = File(dataFolder, "${this.playerUuid}.yml")
@@ -114,11 +111,10 @@ data class PlayerData(
         }
     }
 
-    fun serialize(): Map<String, Any> {
-        return mapOf(
+    fun serialize(): Map<String, Any> =
+        mapOf(
             "playerUuid" to this.playerUuid.toString(),
             "games" to this.games.map { it.toString() },
-            "hasWon" to this.hasWon
+            "hasWon" to this.hasWon,
         )
-    }
 }

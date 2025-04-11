@@ -5,7 +5,11 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.LinearComponents
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Difficulty
+import org.bukkit.GameMode
+import org.bukkit.GameRule
+import org.bukkit.World
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.BlockPartyPlugin
 import ru.joutak.blockparty.Config
@@ -13,7 +17,7 @@ import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
-import java.util.*
+import java.util.UUID
 import kotlin.math.min
 
 object LobbyManager {

@@ -12,7 +12,12 @@ import ru.joutak.blockparty.players.PlayerState
 import ru.joutak.blockparty.utils.LobbyManager
 
 object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
-    override fun execute(sender: CommandSender, command: Command, string: String, args: Array<out String>): Boolean {
+    override fun execute(
+        sender: CommandSender,
+        command: Command,
+        string: String,
+        args: Array<out String>,
+    ): Boolean {
         if (sender !is Player) {
             sender.sendMessage("Данную команду можно использовать только в игре.")
             return true
@@ -32,8 +37,8 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
                         Component.text("встали", NamedTextColor.GREEN),
                         Component.text(" в очередь на "),
                         BlockPartyPlugin.TITLE,
-                        Component.text("!")
-                    )
+                        Component.text("!"),
+                    ),
                 )
                 playerData.state = PlayerState.READY
                 LobbyManager.check()
@@ -46,8 +51,8 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
                         Component.text("вышли", NamedTextColor.RED),
                         Component.text(" из очереди на "),
                         BlockPartyPlugin.TITLE,
-                        Component.text("!")
-                    )
+                        Component.text("!"),
+                    ),
                 )
                 playerData.state = PlayerState.LOBBY
                 LobbyManager.check()
@@ -63,9 +68,6 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
         sender: CommandSender,
         command: Command,
         alias: String,
-        args: Array<out String>
-    ): List<String> {
-        return emptyList()
-    }
-
+        args: Array<out String>,
+    ): List<String> = emptyList()
 }

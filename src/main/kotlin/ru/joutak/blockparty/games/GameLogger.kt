@@ -6,13 +6,15 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.UUID
 import java.util.logging.FileHandler
 import java.util.logging.LogRecord
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
 
-class GameLogger(val game: Game) {
+class GameLogger(
+    val game: Game,
+) {
     companion object {
         private val dataFolder = File(PluginManager.blockParty.dataFolder.path, "games")
         private val winnersFile = File(PluginManager.blockParty.dataFolder.path, "winners.yml")
@@ -30,12 +32,13 @@ class GameLogger(val game: Game) {
         logFile.createNewFile()
 
         val fileHandler = FileHandler(logFile.absolutePath, true)
-        fileHandler.formatter = object : SimpleFormatter() {
-            override fun format(record: LogRecord): String {
-                val timestamp = SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(record.millis)
-                return "[$timestamp ${record.level}] [${PluginManager.blockParty.pluginMeta.name}] [GAME/${game.uuid}] ${record.message}\n"
+        fileHandler.formatter =
+            object : SimpleFormatter() {
+                override fun format(record: LogRecord): String {
+                    val timestamp = SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(record.millis)
+                    return "[$timestamp ${record.level}] [${PluginManager.blockParty.pluginMeta.name}] [GAME/${game.uuid}] ${record.message}\n"
+                }
             }
-        }
 
         logger.setParent(PluginManager.getLogger())
         logger.addHandler(fileHandler)
@@ -68,8 +71,6 @@ class GameLogger(val game: Game) {
         } catch (e: IOException) {
             PluginManager.getLogger().severe("Ошибка при сохранении информации об игре: ${e.message}")
         }
-
-
     }
 
     fun addWinners(winners: Iterable<UUID>) {

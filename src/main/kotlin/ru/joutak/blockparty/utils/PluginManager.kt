@@ -6,10 +6,8 @@ import ru.joutak.blockparty.BlockPartyPlugin
 import java.util.logging.Logger
 
 object PluginManager {
-    val blockParty : BlockPartyPlugin = BlockPartyPlugin.instance
-    val multiverseCore : MultiverseCore = Bukkit.getServer().pluginManager.getPlugin("Multiverse-Core") as MultiverseCore
+    val blockParty: BlockPartyPlugin = BlockPartyPlugin.instance
+    val multiverseCore: MultiverseCore = Bukkit.getServer().pluginManager.getPlugin("Multiverse-Core") as MultiverseCore
 
-    fun getLogger(): Logger {
-        return blockParty.logger
-    }
+    fun getLogger(): Logger = blockParty.logger
 }

@@ -10,34 +10,36 @@ object ArenaManager {
     private var arenasFile = YamlConfiguration()
 
     fun add(arena: Arena) {
-        if (arenas.containsKey(arena.name))
+        if (arenas.containsKey(arena.name)) {
             throw IllegalArgumentException("Арена с таким именем уже существует.")
+        }
 
         arenas[arena.name] = arena
     }
 
     fun get(name: String): Arena {
-        if (!arenas.containsKey(name))
+        if (!arenas.containsKey(name)) {
             throw IllegalArgumentException("Арены с таким именем не существует.")
+        }
 
         return arenas[name]!!
     }
 
-    fun getArenas() : Map<String, Arena> {
-        return arenas
-    }
+    fun getArenas(): Map<String, Arena> = arenas
 
-    fun getReadyArena() : Arena? {
+    fun getReadyArena(): Arena? {
         for (arena in arenas.values) {
-            if (arena.getState() == ArenaState.READY)
+            if (arena.getState() == ArenaState.READY) {
                 return arena
+            }
         }
         return null
     }
 
     fun remove(name: String) {
-        if (!arenas.containsKey(name))
+        if (!arenas.containsKey(name)) {
             throw IllegalArgumentException("Арены с таким именем не существует.")
+        }
 
         arenas.remove(name)
     }
@@ -48,8 +50,9 @@ object ArenaManager {
 
     fun hasReadyArena(): Boolean {
         for (arena in arenas.values) {
-            if (arena.getState() == ArenaState.READY)
+            if (arena.getState() == ArenaState.READY) {
                 return true
+            }
         }
         return false
     }
@@ -78,9 +81,12 @@ object ArenaManager {
     fun saveArenas() {
         val fx = File(PluginManager.blockParty.dataFolder, "arenas.yml")
 
-        arenasFile.set("arenas", arenas.values.map {
-                value -> value.serialize()
-        })
+        arenasFile.set(
+            "arenas",
+            arenas.values.map { value ->
+                value.serialize()
+            },
+        )
 
         try {
             arenasFile.save(fx)

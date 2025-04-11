@@ -18,7 +18,7 @@ import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
 import ru.joutak.blockparty.utils.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
-import java.util.*
+import java.util.UUID
 
 class Game(
     private val arena: Arena,
@@ -82,6 +82,11 @@ class Game(
         scoreboard.update(getPlayers(checkRemainingPlayers).size, round)
         scoreboard.setBossBarTimer(onlinePlayers, phase, timeLeft, totalTime)
 
+        handleMusic()
+        handlePhase()
+    }
+
+    private fun handleMusic() {
         when (phase) {
             GamePhase.ROUND_START -> {
                 if (!isMusicPlaying) {
@@ -99,7 +104,9 @@ class Game(
 
             else -> {}
         }
+    }
 
+    private fun handlePhase() {
         when (phase) {
             GamePhase.ROUND_START -> startNewRound()
             GamePhase.CHOOSE_BLOCK -> chooseBlock()
@@ -177,28 +184,6 @@ class Game(
         phase = GamePhase.CHECK_PLAYERS
     }
 
-    fun knockout(playerUuid: UUID) {
-        logger.info("Игрок $playerUuid выбыл из игры!")
-
-        val player = Bukkit.getPlayer(playerUuid) ?: return
-
-        Audience.audience(player).showTitle(
-            Title.title(
-                LinearComponents.linear(
-                    Component.text("Вы проиграли! :(", NamedTextColor.RED),
-                ),
-                LinearComponents.linear(),
-            ),
-        )
-
-        player.gameMode = GameMode.SPECTATOR
-        player.teleport(arena.center)
-
-        if (getPhase() != GamePhase.FINISH) {
-            checkPlayers()
-        }
-    }
-
     fun checkPlayers() {
         for (playerUuid in onlinePlayers.filter { !PlayerData.get(it).isInGame() }) {
             logger.info("Игрок $playerUuid вышел из игры!")
@@ -259,6 +244,28 @@ class Game(
 
         GameManager.remove(uuid)
         LobbyManager.check()
+    }
+
+    fun knockout(playerUuid: UUID) {
+        logger.info("Игрок $playerUuid выбыл из игры!")
+
+        val player = Bukkit.getPlayer(playerUuid) ?: return
+
+        Audience.audience(player).showTitle(
+            Title.title(
+                LinearComponents.linear(
+                    Component.text("Вы проиграли! :(", NamedTextColor.RED),
+                ),
+                LinearComponents.linear(),
+            ),
+        )
+
+        player.gameMode = GameMode.SPECTATOR
+        player.teleport(arena.center)
+
+        if (getPhase() != GamePhase.FINISH) {
+            checkPlayers()
+        }
     }
 
     private fun setTime(time: Int) {

@@ -13,24 +13,24 @@ import ru.joutak.blockparty.listeners.PlayerMoveListener
 import ru.joutak.blockparty.listeners.PlayerQuitListener
 import ru.joutak.blockparty.players.PlayerData
 
-
 class BlockPartyPlugin : JavaPlugin() {
     companion object {
         @JvmStatic
         lateinit var instance: BlockPartyPlugin
 
-        val TITLE = LinearComponents.linear(
-            Component.text("B", NamedTextColor.RED),
-            Component.text("l", NamedTextColor.GOLD),
-            Component.text("o", NamedTextColor.YELLOW),
-            Component.text("c", NamedTextColor.GREEN),
-            Component.text("k", NamedTextColor.AQUA),
-            Component.text("P", NamedTextColor.BLUE),
-            Component.text("a", NamedTextColor.DARK_PURPLE),
-            Component.text("r", NamedTextColor.LIGHT_PURPLE),
-            Component.text("t", NamedTextColor.WHITE),
-            Component.text("y", NamedTextColor.GRAY)
-        )
+        val TITLE =
+            LinearComponents.linear(
+                Component.text("B", NamedTextColor.RED),
+                Component.text("l", NamedTextColor.GOLD),
+                Component.text("o", NamedTextColor.YELLOW),
+                Component.text("c", NamedTextColor.GREEN),
+                Component.text("k", NamedTextColor.AQUA),
+                Component.text("P", NamedTextColor.BLUE),
+                Component.text("a", NamedTextColor.DARK_PURPLE),
+                Component.text("r", NamedTextColor.LIGHT_PURPLE),
+                Component.text("t", NamedTextColor.WHITE),
+                Component.text("y", NamedTextColor.GRAY),
+            )
     }
 
     override fun onEnable() {

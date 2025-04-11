@@ -2,7 +2,7 @@ package ru.joutak.blockparty.music
 
 import org.bukkit.Bukkit
 import org.bukkit.SoundCategory
-import java.util.*
+import java.util.UUID
 
 object MusicManager {
     fun playFor(playersUuids: Iterable<UUID>) {
