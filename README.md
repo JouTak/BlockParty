@@ -1,9 +1,40 @@
 # BlockParty
 BlockParty for ITMOCraft Spartakiada (19.04.2025)
 
-## Building JAR
+## Команды
 
-1. Add a project from repo into Intellij IDEA
-2. Use "Run" button on the top right to build jar\
-`[snapshot]` builds go to `plugins/` folder of test server (../1.21-server/plugins/)\
-`[release]` builds go to `build/` folder of the project
+| Команда      | Параметры                           | Описание                                        |
+|--------------|-------------------------------------|-------------------------------------------------|
+| `/bp create` | name, world, x1, y1, z1, x2, y2, z2 | Добавить арену в заданном мире по координатам   |
+| `/bp config` | key, value                          | Изменить значение в конфиге                     |
+| `/bp remove` | name                                | Удалить арену с данным именем                   |
+| `/bp list`   |                                     | Вывести список имен всех существующих арен      |
+| `/bp info`   | name                                | Вывести информацию об арене с данным именем     |
+| `/bp ready`  |                                     | Встать в очередь/выйти из очереди на BlockParty |
+
+## Про конфиг
+
+| Ключ                         | За что отвечает                               | Тип     |
+|------------------------------|-----------------------------------------------|---------|
+| **LOBBY_WORLD_NAME**         | Название мира с лобби                         | String  |
+| **LOG_INFO_TO_CONSOLE**      | Выводить информацию по каждой игре в консоль  | Boolean |
+| **MAX_PLAYERS_IN_GAME**      | Макс. кол-во игроков в одной игре             | Int     |
+| **MAX_ROUND_TIME**           | Макс. время в раунде (в сек.)                 | Int     |
+| **MIN_ROUND_TIME**           | Мин. время в раунде (в сек.)                  | Int     |
+| **NUMBER_OF_FLOORS**         | Кол-во платформ в мире `bp_floors`            | Int     |
+| **PLAYERS_TO_START**         | Мин. кол-во игроков для начала игры           | Int     |
+| **PLAYERS_TO_END**           | Кол-во игроков для завершения игры            | Int     |
+| **TIME_BETWEEN_ROUNDS**      | Время между раундами (в сек.)                 | Int     |
+| **TIME_TO_START_GAME_LOBBY** | Время отсчета в лобби до начала игры (в сек.) | Int     |
+
+> [!TIP]
+> Для того, чтобы изменить значения конфига, достаточно в игре прописать команду `/bp config <key> <value>`, где <br/>
+> **key** - название константы, которую вы хотите поменять <br/>
+> **value** - значение, которое вы хотите подставить
+
+## Сборка плагина
+
+1. Добавить проект из репозитория в **IntelliJ IDEA**
+2. Нажать кнопку "**Run**" для сборки jar-файла\
+   `[snapshot]` собирается в `plugins/` в папке _тестового_ сервера \
+   `[release]` собирается в `build/` в папке проекта
