@@ -9,7 +9,8 @@ import org.bukkit.GameRule
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
-import ru.joutak.blockparty.Config
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.utils.PluginManager
 import kotlin.random.Random
 
@@ -64,8 +65,10 @@ data class Arena(
     }
 
     fun setCurrentFloorId(floorId: Int) {
-        if (floorId !in 0..<Config.NUMBER_OF_FLOORS) {
-            throw IllegalArgumentException("Неверный floorId: $floorId (макс. допустимое значение ${Config.NUMBER_OF_FLOORS - 1})")
+        if (floorId !in 0..<Config.get(ConfigKeys.NUMBER_OF_FLOORS)) {
+            throw IllegalArgumentException(
+                "Неверный floorId: $floorId (макс. допустимое значение ${Config.get(ConfigKeys.NUMBER_OF_FLOORS) - 1})",
+            )
         }
 
         this.currentFloorId = floorId

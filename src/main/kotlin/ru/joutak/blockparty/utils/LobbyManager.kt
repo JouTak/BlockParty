@@ -12,8 +12,9 @@ import org.bukkit.GameRule
 import org.bukkit.World
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.BlockPartyPlugin
-import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.arenas.ArenaManager
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
@@ -24,16 +25,19 @@ object LobbyManager {
     private val world: World
     private val readyPlayers = LinkedHashSet<UUID>()
     private var gameStartTask: Int? = null
-    private var timeLeft: Int = Config.TIME_TO_START_GAME_LOBBY
+    private var timeLeft: Int =
+        Config.get(
+            ConfigKeys.TIME_TO_START_GAME_LOBBY,
+        )
 
     init {
-        if (Bukkit.getWorld(Config.LOBBY_WORLD_NAME) == null) {
+        if (Bukkit.getWorld(Config.get(ConfigKeys.LOBBY_WORLD_NAME)) == null) {
             world = Bukkit.getWorlds()[0]
             PluginManager.getLogger().warning(
-                "Отсутствует мир ${Config.LOBBY_WORLD_NAME}! В качестве лобби используется мир ${world.name}.",
+                "Отсутствует мир ${Config.get(ConfigKeys.LOBBY_WORLD_NAME)}! В качестве лобби используется мир ${world.name}.",
             )
         } else {
-            world = Bukkit.getWorld(Config.LOBBY_WORLD_NAME)!!
+            world = Bukkit.getWorld(Config.get(ConfigKeys.LOBBY_WORLD_NAME))!!
         }
 
         val worldManager = PluginManager.multiverseCore.mvWorldManager
@@ -76,7 +80,7 @@ object LobbyManager {
         Audience.audience(
             readyPlayers
                 .mapNotNull { Bukkit.getPlayer(it) }
-                .slice(0..<min(readyPlayers.size, Config.MAX_PLAYERS_IN_GAME)),
+                .slice(0..<min(readyPlayers.size, Config.get(ConfigKeys.MAX_PLAYERS_IN_GAME))),
         )
 
     fun check() {
@@ -88,7 +92,7 @@ object LobbyManager {
             }
         }
 
-        if (readyPlayers.count() >= Config.PLAYERS_TO_START && gameStartTask == null) {
+        if (readyPlayers.count() >= Config.get(ConfigKeys.PLAYERS_TO_START) && gameStartTask == null) {
             if (ArenaManager.hasReadyArena()) {
                 startLobbyCountdown()
             } else {
@@ -102,7 +106,7 @@ object LobbyManager {
             return
         }
 
-        if (readyPlayers.count() < Config.PLAYERS_TO_START) {
+        if (readyPlayers.count() < Config.get(ConfigKeys.PLAYERS_TO_START)) {
             if (gameStartTask != null) {
                 getReadyPlayersAudience().sendMessage(
                     LinearComponents.linear(
@@ -115,7 +119,10 @@ object LobbyManager {
             Audience.audience(world.players).sendMessage(
                 LinearComponents.linear(
                     Component.text("Ожидание "),
-                    Component.text("${Config.PLAYERS_TO_START - readyPlayers.count()}", NamedTextColor.GOLD),
+                    Component.text(
+                        "${Config.get(ConfigKeys.PLAYERS_TO_START) - readyPlayers.count()}",
+                        NamedTextColor.GOLD,
+                    ),
                     Component.text(" игроков для начала игры."),
                 ),
             )
@@ -123,7 +130,7 @@ object LobbyManager {
     }
 
     private fun startLobbyCountdown() {
-        timeLeft = Config.TIME_TO_START_GAME_LOBBY
+        timeLeft = Config.get(ConfigKeys.TIME_TO_START_GAME_LOBBY)
 
         gameStartTask =
             Bukkit

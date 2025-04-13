@@ -3,7 +3,8 @@ package ru.joutak.blockparty.arenas
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import ru.joutak.blockparty.Config
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
 import kotlin.random.Random
 
 object Floors {
@@ -11,7 +12,7 @@ object Floors {
     private val floorBlocks = mutableMapOf<Int, Set<Material>>()
 
     fun setRandomFloorAt(arena: Arena): Int {
-        val floorId = Random.nextInt(Config.NUMBER_OF_FLOORS)
+        val floorId = Random.nextInt(Config.get(ConfigKeys.NUMBER_OF_FLOORS))
         for (x in 0..<32) {
             for (z in 0..<32) {
                 val newLoc = Location(Bukkit.getWorld(arena.worldName), arena.x1 + x, arena.y1, arena.z1 + z)

@@ -14,6 +14,7 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     private val commands = mutableMapOf<String, BlockPartyCommand>()
 
     init {
+        registerCommand(BlockPartyConfigCommand)
         registerCommand(BlockPartyCreateCommand)
         registerCommand(BlockPartyRemoveCommand)
         registerCommand(BlockPartyInfoCommand)
@@ -38,7 +39,8 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
             )
         } else {
             return Component.text(
-                "/bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
+                "/bp config <key> <value>\n" +
+                    "/bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
                     "/bp remove <name>\n" +
                     "/bp list\n" +
                     "/bp info <name>\n" +

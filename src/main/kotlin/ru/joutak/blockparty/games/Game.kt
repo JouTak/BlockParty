@@ -9,10 +9,11 @@ import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-import ru.joutak.blockparty.Config
 import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaState
 import ru.joutak.blockparty.arenas.Floors
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
@@ -133,7 +134,7 @@ class Game(
         phase = GamePhase.CHOOSE_BLOCK
 
         if (round == 1) {
-            setTime(Config.TIME_BETWEEN_ROUNDS)
+            setTime(Config.get(ConfigKeys.TIME_BETWEEN_ROUNDS))
         } else {
             setTime(5)
         }
@@ -193,7 +194,7 @@ class Game(
             onlinePlayers.remove(playerUuid)
         }
 
-        if (getPlayers(checkRemainingPlayers).size <= Config.PLAYERS_TO_END) {
+        if (getPlayers(checkRemainingPlayers).size <= Config.get(ConfigKeys.PLAYERS_TO_END)) {
             arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
             winners.addAll(getPlayers(checkRemainingPlayers))
 
@@ -214,7 +215,7 @@ class Game(
             }
 
             phase = GamePhase.FINISH
-            setTime(Config.TIME_BETWEEN_ROUNDS)
+            setTime(Config.get(ConfigKeys.TIME_BETWEEN_ROUNDS))
         } else if (phase == GamePhase.CHECK_PLAYERS) {
             round++
             phase = GamePhase.ROUND_START
@@ -274,10 +275,10 @@ class Game(
     }
 
     private fun calculateRoundTime(): Int =
-        if (Config.MAX_ROUND_TIME - round < Config.MIN_ROUND_TIME) {
-            Config.MIN_ROUND_TIME
+        if (Config.get(ConfigKeys.MAX_ROUND_TIME) - round < Config.get(ConfigKeys.MIN_ROUND_TIME)) {
+            Config.get(ConfigKeys.MIN_ROUND_TIME)
         } else {
-            Config.MAX_ROUND_TIME - round
+            Config.get(ConfigKeys.MAX_ROUND_TIME) - round
         }
 
     private fun getPlayers(checker: (UUID) -> Boolean): List<UUID> = onlinePlayers.filter { playerUuid -> checker(playerUuid) }
