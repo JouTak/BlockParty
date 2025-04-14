@@ -248,6 +248,7 @@ class Game(
         logger.info("Игра завершилась")
 
         GameManager.remove(uuid)
+        logger.close()
         LobbyManager.check()
     }
 

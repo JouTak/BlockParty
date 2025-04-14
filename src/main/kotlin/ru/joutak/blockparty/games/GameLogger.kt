@@ -22,18 +22,19 @@ class GameLogger(
     }
 
     private val logger = Logger.getLogger("GAME/${game.uuid}")
-    private val gameFolder: File = File(dataFolder, game.uuid.toString())
+    private val gameFolder = File(dataFolder, game.uuid.toString())
     private val resultFile = File(gameFolder, "${game.uuid}.yml")
     private val logFile = File(gameFolder, "${game.uuid}.log")
+    private val logFileHandler: FileHandler
 
     init {
         gameFolder.mkdirs()
         winnersFile.createNewFile()
         resultFile.createNewFile()
         logFile.createNewFile()
+        logFileHandler = FileHandler(logFile.absolutePath, true)
 
-        val fileHandler = FileHandler(logFile.absolutePath, true)
-        fileHandler.formatter =
+        logFileHandler.formatter =
             object : SimpleFormatter() {
                 override fun format(record: LogRecord): String {
                     val timestamp = SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(record.millis)
@@ -42,7 +43,7 @@ class GameLogger(
             }
 
         logger.setParent(PluginManager.getLogger())
-        logger.addHandler(fileHandler)
+        logger.addHandler(logFileHandler)
     }
 
     fun info(msg: String) {
@@ -76,5 +77,11 @@ class GameLogger(
 
     fun addWinners(winners: Iterable<UUID>) {
         winnersFile.appendText(winners.joinToString("\n"))
+    }
+
+    fun close() {
+        logFileHandler.flush()
+        logFileHandler.close()
+        logger.removeHandler(logFileHandler)
     }
 }

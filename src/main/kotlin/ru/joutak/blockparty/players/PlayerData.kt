@@ -18,7 +18,7 @@ data class PlayerData(
 ) {
     companion object {
         val playerDatas = mutableMapOf<UUID, PlayerData>()
-        val dataFolder = File(PluginManager.blockParty.dataFolder.path + "/players")
+        val dataFolder = File(PluginManager.blockParty.dataFolder, "players")
 
         private fun create(playerUuid: UUID): PlayerData {
             playerDatas[playerUuid] = PlayerData(playerUuid, PlayerState.LOBBY, null)
@@ -91,6 +91,12 @@ data class PlayerData(
                     values["hasWon"] as Boolean,
                 )
             return playerDatas[uuid]!!
+        }
+    }
+
+    init {
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs()
         }
     }
 

@@ -6,8 +6,8 @@ import java.io.File
 import java.io.IOException
 
 object ArenaManager {
+    private val arenasFile = File(PluginManager.blockParty.dataFolder, "arenas.yml")
     private val arenas = mutableMapOf<String, Arena>()
-    private var arenasFile = YamlConfiguration()
 
     fun add(arena: Arena) {
         if (arenas.containsKey(arena.name)) {
@@ -58,13 +58,12 @@ object ArenaManager {
     }
 
     fun loadArenas() {
-        val fx = File(PluginManager.blockParty.dataFolder, "arenas.yml")
-        if (!fx.exists()) {
+        if (!arenasFile.exists()) {
             PluginManager.blockParty.saveResource("arenas.yml", true)
         }
 
-        arenasFile = YamlConfiguration.loadConfiguration(fx)
-        val arenasList = arenasFile.getList("arenas") as? List<Map<String, Any>> ?: return
+        val arenasYaml = YamlConfiguration.loadConfiguration(arenasFile)
+        val arenasList = arenasYaml.getList("arenas") as? List<Map<String, Any>> ?: return
 
         clear()
 
@@ -79,9 +78,9 @@ object ArenaManager {
     }
 
     fun saveArenas() {
-        val fx = File(PluginManager.blockParty.dataFolder, "arenas.yml")
+        val arenasYaml = YamlConfiguration()
 
-        arenasFile.set(
+        arenasYaml.set(
             "arenas",
             arenas.values.map { value ->
                 value.serialize()
@@ -89,7 +88,7 @@ object ArenaManager {
         )
 
         try {
-            arenasFile.save(fx)
+            arenasYaml.save(arenasFile)
         } catch (e: IOException) {
             PluginManager.getLogger().severe("Ошибка при сохранении зон: ${e.message}")
         }
