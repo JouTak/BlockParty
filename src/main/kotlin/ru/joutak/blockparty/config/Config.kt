@@ -9,6 +9,7 @@ object Config {
     private val config: YamlConfiguration
 
     init {
+        PluginManager.getLogger().info("Загрузка значений из конфига...")
         if (!configFile.exists()) {
             PluginManager.blockParty.saveResource("config.yml", true)
         }
@@ -19,6 +20,9 @@ object Config {
     private fun saveDefaults() {
         for (key in ConfigKeys.all) {
             if (!config.contains(key.path)) {
+                PluginManager
+                    .getLogger()
+                    .warning("Не найден ключ ${key.path} в конфиге! Взято стандартное значение: ${key.value}")
                 config.set(key.path, key.value)
             }
         }

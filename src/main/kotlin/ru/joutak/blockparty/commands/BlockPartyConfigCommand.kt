@@ -18,7 +18,16 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
             return true
         }
 
-        if (args.size != this.args.size) {
+        var set = false
+        var get = false
+
+        if (args.size == this.args.size) {
+            set = true
+        } else if (args.size == this.args.size - 1) {
+            get = true
+        }
+
+        if (!get && !set) {
             return false
         }
 
@@ -29,16 +38,21 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
             return true
         }
 
-        val value = key.parse(args[1])
+        if (get) {
+            sender.sendMessage("Текущее значение ${key.path}: ${Config.get(key)}")
+        } else if (set) {
+            val value = key.parse(args[1])
 
-        if (value == null) {
-            sender.sendMessage("Не удалось преобразовать ${args[1]}.")
-            return true
+            if (value == null) {
+                sender.sendMessage("Не удалось преобразовать ${args[1]}.")
+                return true
+            }
+
+            @Suppress("UNCHECKED_CAST")
+            Config.set(key as ConfigKey<Any>, value)
+            sender.sendMessage("Значение ${key.path} обновлено на $value.")
         }
 
-        @Suppress("UNCHECKED_CAST")
-        Config.set(key as ConfigKey<Any>, value)
-        sender.sendMessage("Значение ${key.path} обновлено на $value.")
         return true
     }
 
