@@ -6,8 +6,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.games.GamePhase
+import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.players.PlayerData
-import ru.joutak.blockparty.utils.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
 
 object PlayerQuitListener : Listener {

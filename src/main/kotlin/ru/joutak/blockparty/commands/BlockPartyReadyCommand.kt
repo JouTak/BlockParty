@@ -7,9 +7,9 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.BlockPartyPlugin
+import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
-import ru.joutak.blockparty.utils.LobbyManager
 
 object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
     override fun execute(

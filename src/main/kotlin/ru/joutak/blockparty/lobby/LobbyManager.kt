@@ -1,4 +1,4 @@
-package ru.joutak.blockparty.utils
+package ru.joutak.blockparty.lobby
 
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
@@ -18,6 +18,7 @@ import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
+import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
 import kotlin.math.min
 
@@ -68,9 +69,11 @@ object LobbyManager {
                 Component.text("/bp ready", NamedTextColor.RED, TextDecoration.BOLD),
             ),
         )
+        LobbyReadyBossBar.setFor(player)
     }
 
     fun removePlayer(player: Player) {
+        LobbyReadyBossBar.removeFor(player)
         readyPlayers.remove(player.uniqueId)
     }
 
@@ -92,6 +95,7 @@ object LobbyManager {
             } else {
                 readyPlayers.remove(player.uniqueId)
             }
+            LobbyReadyBossBar.setFor(player)
         }
 
         if (readyPlayers.count() >= Config.get(ConfigKeys.PLAYERS_TO_START) && gameStartTask == null) {

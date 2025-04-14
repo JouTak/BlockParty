@@ -3,7 +3,7 @@ package ru.joutak.blockparty.games
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
-import ru.joutak.blockparty.utils.LobbyManager
+import ru.joutak.blockparty.lobby.LobbyManager
 import java.util.UUID
 import kotlin.math.min
 

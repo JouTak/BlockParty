@@ -11,6 +11,8 @@ import ru.joutak.blockparty.listeners.PlayerDropItemListener
 import ru.joutak.blockparty.listeners.PlayerJoinListener
 import ru.joutak.blockparty.listeners.PlayerMoveListener
 import ru.joutak.blockparty.listeners.PlayerQuitListener
+import ru.joutak.blockparty.lobby.LobbyReadyBossBar
+import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
 
 class BlockPartyPlugin : JavaPlugin() {
@@ -33,20 +35,24 @@ class BlockPartyPlugin : JavaPlugin() {
             )
     }
 
+    /**
+     * Plugin startup logic
+     */
     override fun onEnable() {
-        // Plugin startup logic
         instance = this
 
         // Load data, register commands, events, etc.
         loadData()
         registerEvents()
         registerCommands()
+        LobbyReadyBossBar.removeAllBossBars()
 
         logger.info("Плагин ${pluginMeta.name} версии ${pluginMeta.version} включен!")
     }
 
     private fun loadData() {
         ArenaManager.loadArenas()
+        MusicManager.loadMusic()
     }
 
     private fun registerEvents() {
@@ -60,8 +66,10 @@ class BlockPartyPlugin : JavaPlugin() {
         getCommand("bp")?.setExecutor(BlockPartyCommandExecutor)
     }
 
+    /**
+     * Plugin shutdown logic
+     */
     override fun onDisable() {
-        // Plugin shutdown logic
         for (player in Bukkit.getOnlinePlayers()) {
             PlayerData.get(player.uniqueId).saveData()
         }

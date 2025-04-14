@@ -3,8 +3,8 @@ package ru.joutak.blockparty.listeners
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.players.PlayerData
-import ru.joutak.blockparty.utils.LobbyManager
 
 object PlayerJoinListener : Listener {
     @EventHandler
