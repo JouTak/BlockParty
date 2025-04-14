@@ -4,20 +4,22 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.LinearComponents
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import ru.joutak.blockparty.BlockPartyPlugin
 import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaState
 import ru.joutak.blockparty.arenas.Floors
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
+import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
-import ru.joutak.blockparty.utils.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
 
@@ -26,8 +28,9 @@ class Game(
     private val players: MutableList<UUID>,
 ) : Runnable {
     val uuid: UUID = UUID.randomUUID()
-    private val scoreboard: GameScoreboard = GameScoreboard()
-    private val logger: GameLogger = GameLogger(this)
+    private val scoreboard = GameScoreboard()
+    private val logger = GameLogger(this)
+    private val musicManager = MusicManager()
     private val onlinePlayers = mutableSetOf<UUID>()
     private val winners = mutableSetOf<UUID>()
     private var round = 1
@@ -36,7 +39,6 @@ class Game(
     private var timeLeft = 0
     private var currentBlock: Material? = null
     private var taskId: Int = -1
-    private var isMusicPlaying: Boolean = false
 
     companion object {
         val checkRemainingPlayers = { playerUuid: UUID ->
@@ -90,17 +92,11 @@ class Game(
     private fun handleMusic() {
         when (phase) {
             GamePhase.ROUND_START -> {
-                if (!isMusicPlaying) {
-                    MusicManager.playFor(onlinePlayers)
-                    isMusicPlaying = true
-                }
+                musicManager.playNextSong(onlinePlayers)
             }
 
             GamePhase.BREAK_FLOOR, GamePhase.CHECK_PLAYERS, GamePhase.FINISH -> {
-                if (isMusicPlaying) {
-                    MusicManager.stopFor(onlinePlayers)
-                    isMusicPlaying = false
-                }
+                musicManager.stopSong(onlinePlayers)
             }
 
             else -> {}
@@ -205,6 +201,14 @@ class Game(
                         Component.text("Вы победили! :)", NamedTextColor.GREEN),
                     ),
                     LinearComponents.linear(),
+                ),
+            )
+            Audience.audience(LobbyManager.getPlayers()).sendMessage(
+                LinearComponents.linear(
+                    Component.text("Победителями очередной игры в "),
+                    BlockPartyPlugin.TITLE,
+                    Component.text(" стали:"),
+                    Component.text(winners.joinToString("\n"), NamedTextColor.WHITE, TextDecoration.BOLD),
                 ),
             )
 

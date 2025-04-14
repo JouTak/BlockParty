@@ -2,28 +2,59 @@ package ru.joutak.blockparty.music
 
 import org.bukkit.Bukkit
 import org.bukkit.SoundCategory
+import org.bukkit.configuration.file.YamlConfiguration
+import ru.joutak.blockparty.utils.PluginManager
+import java.io.File
 import java.util.UUID
 
-object MusicManager {
-    fun playFor(playersUuids: Iterable<UUID>) {
+class MusicManager {
+    private var isMusicPlaying = false
+    private var musicName = music.random()
+
+    companion object {
+        private val musicFile = File(PluginManager.blockParty.dataFolder, "music.yml")
+        private val music = mutableListOf<String>()
+
+        fun loadMusic() {
+            if (!musicFile.exists()) {
+                PluginManager.blockParty.saveResource("music.yml", true)
+            }
+
+            val musicFile = YamlConfiguration.loadConfiguration(musicFile)
+            val musicList = musicFile.getList("music") as? List<String> ?: return
+
+            try {
+                musicList.forEach { music.add(it) }
+            } catch (e: Exception) {
+                PluginManager.getLogger().severe("Ошибка при загрузке списка музыки: ${e.message}")
+            }
+        }
+    }
+
+    fun playNextSong(playersUuids: Iterable<UUID>) {
+        if (isMusicPlaying) return
+        musicName = music.random()
+        playFor(playersUuids)
+        isMusicPlaying = true
+    }
+
+    fun stopSong(playersUuids: Iterable<UUID>) {
+        if (!isMusicPlaying) return
+        stopFor(playersUuids)
+        isMusicPlaying = false
+    }
+
+    private fun playFor(playersUuids: Iterable<UUID>) {
         for (uuid in playersUuids) {
-            playFor(uuid)
+            Bukkit.getPlayer(uuid)?.let {
+                it.playSound(it.location, "minecraft:$musicName", SoundCategory.RECORDS, 0.25f, 1.0f)
+            }
         }
     }
 
-    fun playFor(playerUuid: UUID) {
-        Bukkit.getPlayer(playerUuid)?.let {
-            it.playSound(it.location, "minecraft:music.bp", SoundCategory.RECORDS, 0.25f, 1.0f)
-        }
-    }
-
-    fun stopFor(playersUuids: Iterable<UUID>) {
+    private fun stopFor(playersUuids: Iterable<UUID>) {
         for (uuid in playersUuids) {
-            stopFor(uuid)
+            Bukkit.getPlayer(uuid)?.stopSound("minecraft:$musicName", SoundCategory.RECORDS)
         }
-    }
-
-    fun stopFor(playerUuid: UUID) {
-        Bukkit.getPlayer(playerUuid)?.stopSound("minecraft:music.bp", SoundCategory.RECORDS)
     }
 }

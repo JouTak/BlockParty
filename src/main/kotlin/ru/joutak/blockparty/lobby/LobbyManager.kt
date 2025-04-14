@@ -74,6 +74,8 @@ object LobbyManager {
         readyPlayers.remove(player.uniqueId)
     }
 
+    fun getPlayers(): List<Player> = world.players
+
     fun getReadyPlayers(): List<UUID> = readyPlayers.toList()
 
     fun getReadyPlayersAudience(): Audience =
