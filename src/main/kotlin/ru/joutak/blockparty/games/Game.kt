@@ -203,14 +203,25 @@ class Game(
                     LinearComponents.linear(),
                 ),
             )
-            Audience.audience(LobbyManager.getPlayers()).sendMessage(
-                LinearComponents.linear(
-                    Component.text("Победителями очередной игры в "),
-                    BlockPartyPlugin.TITLE,
-                    Component.text(" стали:"),
-                    Component.text(winners.joinToString("\n"), NamedTextColor.WHITE, TextDecoration.BOLD),
-                ),
-            )
+
+            if (winners.size > 0) {
+                Audience
+                    .audience(
+                        Audience.audience(LobbyManager.getPlayers()),
+                        Audience.audience(onlinePlayers.mapNotNull { Bukkit.getPlayer(it) }),
+                    ).sendMessage(
+                        LinearComponents.linear(
+                            Component.text("Победителями очередной игры в "),
+                            BlockPartyPlugin.TITLE,
+                            Component.text(" стали:\n"),
+                            Component.text(
+                                winners.mapNotNull { Bukkit.getPlayer(it)?.name }.joinToString("\n"),
+                                NamedTextColor.WHITE,
+                                TextDecoration.BOLD,
+                            ),
+                        ),
+                    )
+            }
 
             logger.info("Победителями стали:\n${winners.joinToString("\n")}")
             logger.addWinners(winners)
