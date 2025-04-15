@@ -149,7 +149,9 @@ class Game(
         for (player in onlinePlayers) {
             val inventory = Bukkit.getPlayer(player)?.inventory ?: continue
             inventory.clear()
-            inventory.addItem(item)
+            for (slot in 0..8) {
+                inventory.setItem(slot, item)
+            }
         }
 
         logger.info("$currentBlock выбран в раунде $round")
