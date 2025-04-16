@@ -14,6 +14,12 @@ object LobbyReadyBossBar {
         LobbyManager.getPlayers().forEach { it.activeBossBars().forEach { bar -> it.hideBossBar(bar) } }
     }
 
+    fun checkLobby() {
+        for (player in LobbyManager.getPlayers()) {
+            setFor(player)
+        }
+    }
+
     fun setFor(player: Player) {
         val uuid = player.uniqueId
         val state = PlayerData.get(uuid).state

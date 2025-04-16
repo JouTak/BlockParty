@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
+import ru.joutak.blockparty.listeners.PlayerChangedWorldListener
 import ru.joutak.blockparty.listeners.PlayerDropItemListener
 import ru.joutak.blockparty.listeners.PlayerJoinListener
 import ru.joutak.blockparty.listeners.PlayerMoveListener
@@ -46,6 +47,7 @@ class BlockPartyPlugin : JavaPlugin() {
         registerEvents()
         registerCommands()
         LobbyReadyBossBar.removeAllBossBars()
+        LobbyReadyBossBar.checkLobby()
 
         logger.info("Плагин ${pluginMeta.name} версии ${pluginMeta.version} включен!")
     }
@@ -60,6 +62,7 @@ class BlockPartyPlugin : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerQuitListener, instance)
         Bukkit.getPluginManager().registerEvents(PlayerMoveListener, instance)
         Bukkit.getPluginManager().registerEvents(PlayerDropItemListener, instance)
+        Bukkit.getPluginManager().registerEvents(PlayerChangedWorldListener, instance)
     }
 
     private fun registerCommands() {

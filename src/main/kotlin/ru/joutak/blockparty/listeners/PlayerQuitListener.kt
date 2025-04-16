@@ -26,7 +26,7 @@ object PlayerQuitListener : Listener {
         Bukkit.getScheduler().runTaskLater(
             PluginManager.blockParty,
             Runnable {
-                LobbyManager.removePlayer(player)
+                LobbyManager.removeFromReadyPlayers(player)
                 playerData.saveData()
                 LobbyManager.check()
             },

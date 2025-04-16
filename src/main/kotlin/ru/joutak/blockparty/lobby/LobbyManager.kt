@@ -23,7 +23,7 @@ import java.util.UUID
 import kotlin.math.min
 
 object LobbyManager {
-    private val world: World
+    val world: World
     private val readyPlayers = LinkedHashSet<UUID>()
     private var gameStartTask: Int? = null
     private var timeLeft: Int =
@@ -59,8 +59,15 @@ object LobbyManager {
         world.setGameRule(GameRule.DO_MOB_SPAWNING, false)
     }
 
-    fun addPlayer(player: Player) {
-        PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), player, world.spawnLocation)
+    fun teleportToLobby(player: Player) {
+        PluginManager.multiverseCore.teleportPlayer(
+            Bukkit.getConsoleSender(),
+            player,
+            PluginManager.multiverseCore.mvWorldManager
+                .getMVWorld(world)
+                .spawnLocation,
+        )
+        LobbyReadyBossBar.setFor(player)
         Audience.audience(player).sendMessage(
             LinearComponents.linear(
                 Component.text("Для игры в "),
@@ -69,11 +76,9 @@ object LobbyManager {
                 Component.text("/bp ready", NamedTextColor.RED, TextDecoration.BOLD),
             ),
         )
-        LobbyReadyBossBar.setFor(player)
     }
 
-    fun removePlayer(player: Player) {
-        LobbyReadyBossBar.removeFor(player)
+    fun removeFromReadyPlayers(player: Player) {
         readyPlayers.remove(player.uniqueId)
     }
 
@@ -95,7 +100,6 @@ object LobbyManager {
             } else {
                 readyPlayers.remove(player.uniqueId)
             }
-            LobbyReadyBossBar.setFor(player)
         }
 
         if (readyPlayers.count() >= Config.get(ConfigKeys.PLAYERS_TO_START) && gameStartTask == null) {

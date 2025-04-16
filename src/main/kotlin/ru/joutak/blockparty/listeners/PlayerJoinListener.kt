@@ -12,6 +12,6 @@ object PlayerJoinListener : Listener {
         event.joinMessage(null)
         val player = event.player
         PlayerData.resetGame(player.uniqueId)
-        LobbyManager.addPlayer(player)
+        LobbyManager.teleportToLobby(player)
     }
 }

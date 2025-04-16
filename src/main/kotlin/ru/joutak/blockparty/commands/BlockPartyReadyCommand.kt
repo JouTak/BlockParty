@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.BlockPartyPlugin
 import ru.joutak.blockparty.lobby.LobbyManager
+import ru.joutak.blockparty.lobby.LobbyReadyBossBar
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.players.PlayerState
 
@@ -59,6 +60,14 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
             }
 
             PlayerState.INGAME -> sender.sendMessage("Данную команду можно использовать только в лобби.")
+        }
+
+        when (playerData.state) {
+            PlayerState.LOBBY, PlayerState.READY -> {
+                LobbyReadyBossBar.setFor(sender)
+            }
+
+            else -> {}
         }
 
         return true

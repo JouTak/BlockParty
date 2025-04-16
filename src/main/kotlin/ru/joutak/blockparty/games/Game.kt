@@ -65,7 +65,7 @@ class Game(
             onlinePlayers.add(playerUuid)
             Bukkit.getPlayer(playerUuid)?.let {
                 PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
-                LobbyManager.removePlayer(it)
+                LobbyManager.removeFromReadyPlayers(it)
                 scoreboard.setFor(it)
             }
         }
@@ -254,7 +254,7 @@ class Game(
 
             Bukkit.getPlayer(playerUuid)?.let {
                 scoreboard.removeFor(it)
-                LobbyManager.addPlayer(it)
+                LobbyManager.teleportToLobby(it)
             }
         }
 
