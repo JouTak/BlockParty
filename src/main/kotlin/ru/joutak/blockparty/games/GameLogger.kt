@@ -76,7 +76,8 @@ class GameLogger(
     }
 
     fun addWinners(winners: Iterable<UUID>) {
-        winnersFile.appendText(winners.joinToString("\n"))
+        if (winners.count() == 0) return
+        winnersFile.appendText(winners.joinToString("\n") + "\n")
     }
 
     fun close() {
