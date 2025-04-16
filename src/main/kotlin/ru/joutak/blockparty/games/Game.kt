@@ -209,13 +209,12 @@ class Game(
             if (winners.size > 0) {
                 Audience
                     .audience(
-                        Audience.audience(LobbyManager.getPlayers()),
-                        Audience.audience(onlinePlayers.mapNotNull { Bukkit.getPlayer(it) }),
+                        Bukkit.getServer().onlinePlayers,
                     ).sendMessage(
                         LinearComponents.linear(
-                            Component.text("Победителями очередной игры в "),
+                            Component.text(if (winners.size == 1) "Победителем" else "Победителями" + " очередной игры в "),
                             BlockPartyPlugin.TITLE,
-                            Component.text(" стали:\n"),
+                            Component.text(if (winners.size == 1) " стал" else " стали" + ":\n"),
                             Component.text(
                                 winners.mapNotNull { Bukkit.getPlayer(it)?.name }.joinToString("\n"),
                                 NamedTextColor.WHITE,
