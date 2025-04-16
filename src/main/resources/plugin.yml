@@ -1,14 +1,8 @@
 name: BlockParty
 version: '$version'
 main: ru.joutak.blockparty.BlockPartyPlugin
-api-version: '1.20'
+api-version: '1.21.4'
 depend: [ 'Multiverse-Core', 'KotlinPlugins' ]
 commands:
   bp:
     description: BlockParty commands
-    usage: |
-      /bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>
-      /bp remove <name>
-      /bp list
-      /bp info <name>
-      /bp ready

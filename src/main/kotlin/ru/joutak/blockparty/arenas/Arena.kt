@@ -78,7 +78,7 @@ data class Arena(
         val world = Bukkit.getWorld(worldName)!!
         for (corner in corners) {
             for (i in 0..amount) {
-                val firework = world.spawnEntity(corner, EntityType.FIREWORK) as Firework
+                val firework = world.spawnEntity(corner, EntityType.FIREWORK_ROCKET) as Firework
                 val meta = firework.fireworkMeta
 
                 meta.addEffect(

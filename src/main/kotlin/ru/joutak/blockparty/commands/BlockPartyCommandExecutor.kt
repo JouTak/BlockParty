@@ -53,10 +53,10 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
         sender: CommandSender,
         command: Command,
         string: String,
-        args: Array<out String>?,
+        args: Array<out String>,
     ): Boolean {
-        if (args?.getOrNull(0) in commands.keys &&
-            commands[args!![0]]!!.execute(
+        if (args.getOrNull(0) in commands.keys &&
+            commands[args[0]]!!.execute(
                 sender,
                 command,
                 string,

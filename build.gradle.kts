@@ -5,7 +5,7 @@ if (commitHash.isNotBlank()) {
     version = "$version-$commitHash"
 }
 
-val targetJavaVersion = 17
+val targetJavaVersion = 21
 plugins {
     kotlin("jvm") version "2.1.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("com.onarandombox.multiversecore:multiverse-core:4.3.14")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
