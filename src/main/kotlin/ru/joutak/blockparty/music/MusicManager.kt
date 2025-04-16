@@ -16,12 +16,10 @@ class MusicManager {
         private val music = mutableListOf<String>()
 
         fun loadMusic() {
-            if (!musicFile.exists()) {
-                PluginManager.blockParty.saveResource("music.yml", true)
-            }
+            PluginManager.blockParty.saveResource("music.yml", true)
 
-            val musicFile = YamlConfiguration.loadConfiguration(musicFile)
-            val musicList = musicFile.getList("music") as? List<String> ?: return
+            val musicYaml = YamlConfiguration.loadConfiguration(musicFile)
+            val musicList = musicYaml.getList("music") as? List<String> ?: return
 
             try {
                 musicList.forEach { music.add(it) }
