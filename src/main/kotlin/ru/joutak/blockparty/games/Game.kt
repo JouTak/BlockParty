@@ -9,6 +9,7 @@ import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import ru.joutak.blockparty.BlockPartyPlugin
 import ru.joutak.blockparty.arenas.Arena
@@ -33,22 +34,13 @@ class Game(
     private val musicManager = MusicManager()
     private val onlinePlayers = mutableSetOf<UUID>()
     private val winners = mutableSetOf<UUID>()
+    private val spectators = mutableSetOf<UUID>()
     private var round = 1
     private var phase = GamePhase.ROUND_START
     private var totalTime = 0
     private var timeLeft = 0
     private var currentBlock: Material? = null
     private var taskId: Int = -1
-
-    companion object {
-        val checkRemainingPlayers = { playerUuid: UUID ->
-            if (Bukkit.getPlayer(playerUuid) == null) {
-                false
-            } else {
-                PlayerData.get(playerUuid).isInGame() && Bukkit.getPlayer(playerUuid)!!.gameMode == GameMode.ADVENTURE
-            }
-        }
-    }
 
     fun start() {
         arena.reset()
@@ -82,8 +74,8 @@ class Game(
     }
 
     override fun run() {
-        scoreboard.update(getPlayers(checkRemainingPlayers).size, round)
-        scoreboard.setBossBarTimer(onlinePlayers, phase, timeLeft, totalTime)
+        scoreboard.update(getRemainingPlayers().count(), round)
+        scoreboard.setBossBarTimer(getAvailablePlayers(), phase, timeLeft, totalTime)
 
         handleMusic()
         handlePhase()
@@ -92,11 +84,11 @@ class Game(
     private fun handleMusic() {
         when (phase) {
             GamePhase.ROUND_START -> {
-                musicManager.playNextSong(onlinePlayers)
+                musicManager.playNextSong(getAvailablePlayers())
             }
 
             GamePhase.BREAK_FLOOR, GamePhase.CHECK_PLAYERS, GamePhase.FINISH -> {
-                musicManager.stopSong(onlinePlayers)
+                musicManager.stopSong(getAvailablePlayers())
             }
 
             else -> {}
@@ -116,8 +108,10 @@ class Game(
 
     private fun startNewRound() {
         logger.info("Раунд $round начался")
+        val allPlayersAudience =
+            Audience.audience(getAvailablePlayers().mapNotNull { Bukkit.getPlayer(it) })
 
-        Audience.audience(onlinePlayers.mapNotNull { Bukkit.getPlayer(it) }).showTitle(
+        allPlayersAudience.showTitle(
             Title.title(
                 LinearComponents.linear(
                     Component.text("Раунд $round", NamedTextColor.NAMES.values().random()),
@@ -214,9 +208,9 @@ class Game(
             onlinePlayers.remove(playerUuid)
         }
 
-        if (getPlayers(checkRemainingPlayers).size <= Config.get(ConfigKeys.PLAYERS_TO_END)) {
+        if (getRemainingPlayers().count() <= Config.get(ConfigKeys.PLAYERS_TO_END)) {
             arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
-            winners.addAll(getPlayers(checkRemainingPlayers))
+            winners.addAll(getRemainingPlayers())
 
             val winnersAudience = Audience.audience(winners.mapNotNull { Bukkit.getPlayer(it) })
             winnersAudience.showTitle(
@@ -270,8 +264,10 @@ class Game(
         logger.saveGameResults()
 
         arena.reset()
-        for (playerUuid in onlinePlayers) {
-            PlayerData.resetGame(playerUuid)
+        for (playerUuid in getAvailablePlayers()) {
+            if (playerUuid in onlinePlayers) {
+                PlayerData.resetGame(playerUuid)
+            }
 
             Bukkit.getPlayer(playerUuid)?.let {
                 scoreboard.removeFor(it)
@@ -320,7 +316,16 @@ class Game(
             Config.get(ConfigKeys.MAX_ROUND_TIME) - round
         }
 
-    private fun getPlayers(checker: (UUID) -> Boolean): List<UUID> = onlinePlayers.filter { playerUuid -> checker(playerUuid) }
+    private fun getRemainingPlayers(): Iterable<UUID> =
+        onlinePlayers.filter {
+            if (Bukkit.getPlayer(it) == null) {
+                false
+            } else {
+                PlayerData.get(it).isInGame() && Bukkit.getPlayer(it)!!.gameMode == GameMode.ADVENTURE
+            }
+        }
+
+    private fun getAvailablePlayers(): Iterable<UUID> = onlinePlayers + spectators
 
     fun getPhase(): GamePhase = this.phase
 
