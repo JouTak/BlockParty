@@ -17,13 +17,7 @@ object ArenaManager {
         arenas[arena.name] = arena
     }
 
-    fun get(name: String): Arena {
-        if (!arenas.containsKey(name)) {
-            throw IllegalArgumentException("Арены с таким именем не существует.")
-        }
-
-        return arenas[name]!!
-    }
+    fun get(name: String): Arena? = arenas[name]
 
     fun getArenas(): Map<String, Arena> = arenas
 

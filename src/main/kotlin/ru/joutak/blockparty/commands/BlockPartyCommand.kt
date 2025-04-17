@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender
 abstract class BlockPartyCommand(
     val name: String,
     val args: List<String>,
+    val permission: String? = null,
 ) {
     abstract fun execute(
         sender: CommandSender,

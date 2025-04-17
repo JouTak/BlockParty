@@ -8,18 +8,17 @@ import ru.joutak.blockparty.arenas.Arena
 import ru.joutak.blockparty.arenas.ArenaManager
 
 object BlockPartyCreateCommand :
-    BlockPartyCommand("create", listOf<String>("name", "world", "x1", "y1", "z1", "x2", "y2", "z2")) {
+    BlockPartyCommand(
+        "create",
+        listOf<String>("name", "world", "x1", "y1", "z1", "x2", "y2", "z2"),
+        "blockparty.admin",
+    ) {
     override fun execute(
         sender: CommandSender,
         command: Command,
         string: String,
         args: Array<out String>,
     ): Boolean {
-        if (!sender.isOp) {
-            sender.sendMessage("Недостаточно прав для использования данной команды.")
-            return true
-        }
-
         if (args.size != this.args.size) {
             return false
         }
@@ -64,12 +63,8 @@ object BlockPartyCreateCommand :
         command: Command,
         alias: String,
         args: Array<out String>,
-    ): List<String> {
-        if (!sender.isOp) {
-            return emptyList()
-        }
-
-        return when (args.size) {
+    ): List<String> =
+        when (args.size) {
             2 -> Bukkit.getWorlds().map { it.name }
             3 ->
                 if (sender is Player) {
@@ -105,5 +100,4 @@ object BlockPartyCreateCommand :
                 }
             else -> emptyList()
         }
-    }
 }

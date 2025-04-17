@@ -4,18 +4,13 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import ru.joutak.blockparty.arenas.ArenaManager
 
-object BlockPartyRemoveCommand : BlockPartyCommand("remove", listOf<String>("remove")) {
+object BlockPartyRemoveCommand : BlockPartyCommand("remove", listOf<String>("remove"), "blockparty.admin") {
     override fun execute(
         sender: CommandSender,
         command: Command,
         string: String,
         args: Array<out String>,
     ): Boolean {
-        if (!sender.isOp) {
-            sender.sendMessage("Недостаточно прав для использования данной команды.")
-            return true
-        }
-
         if (args.size != this.args.size) {
             return false
         }
@@ -35,12 +30,9 @@ object BlockPartyRemoveCommand : BlockPartyCommand("remove", listOf<String>("rem
         command: Command,
         alias: String,
         args: Array<out String>,
-    ): List<String> {
-        if (!sender.isOp) return emptyList()
-
-        return when (args.size) {
+    ): List<String> =
+        when (args.size) {
             1 -> ArenaManager.getArenas().keys.filter { it.startsWith(args[0], true) }
             else -> emptyList()
         }
-    }
 }

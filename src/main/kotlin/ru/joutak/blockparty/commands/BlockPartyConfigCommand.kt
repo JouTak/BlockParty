@@ -6,18 +6,13 @@ import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKey
 import ru.joutak.blockparty.config.ConfigKeys
 
-object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "value")) {
+object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "value"), "blockparty.admin") {
     override fun execute(
         sender: CommandSender,
         command: Command,
         string: String,
         args: Array<out String>,
     ): Boolean {
-        if (!sender.isOp) {
-            sender.sendMessage("Недостаточно прав для использования данной команды.")
-            return true
-        }
-
         var set = false
         var get = false
 
@@ -40,18 +35,18 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
 
         if (get) {
             sender.sendMessage("Текущее значение ${key.path}: ${Config.get(key)}")
-        } else if (set) {
-            val value = key.parse(args[1])
-
-            if (value == null) {
-                sender.sendMessage("Не удалось преобразовать ${args[1]}.")
-                return true
-            }
-
-            @Suppress("UNCHECKED_CAST")
-            Config.set(key as ConfigKey<Any>, value)
-            sender.sendMessage("Значение ${key.path} обновлено на $value.")
         }
+        // else if (set)
+        val value = key.parse(args[1])
+
+        if (value == null) {
+            sender.sendMessage("Не удалось преобразовать ${args[1]}.")
+            return true
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        Config.set(key as ConfigKey<Any>, value)
+        sender.sendMessage("Значение ${key.path} обновлено на $value.")
 
         return true
     }
@@ -61,12 +56,9 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
         command: Command,
         alias: String,
         args: Array<out String>,
-    ): List<String> {
-        if (!sender.isOp) return emptyList()
-
-        return when (args.size) {
+    ): List<String> =
+        when (args.size) {
             1 -> ConfigKeys.all.map { it.path }.filter { it.startsWith(args[0], true) }
             else -> emptyList()
         }
-    }
 }

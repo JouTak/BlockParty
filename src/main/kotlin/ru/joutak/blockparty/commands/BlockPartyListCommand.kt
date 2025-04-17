@@ -4,18 +4,13 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import ru.joutak.blockparty.arenas.ArenaManager
 
-object BlockPartyListCommand : BlockPartyCommand("list", listOf<String>()) {
+object BlockPartyListCommand : BlockPartyCommand("list", listOf<String>(), "blockparty.admin") {
     override fun execute(
         sender: CommandSender,
         command: Command,
         string: String,
         args: Array<out String>,
     ): Boolean {
-        if (!sender.isOp) {
-            sender.sendMessage("Недостаточно прав для использования данной команды.")
-            return true
-        }
-
         if (args.size != this.args.size) {
             return false
         }

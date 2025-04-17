@@ -6,3 +6,16 @@ depend: [ 'Multiverse-Core', 'KotlinPlugins' ]
 commands:
   bp:
     description: BlockParty commands
+
+permissions:
+  blockparty.admin:
+    default: op
+    description: Доступ ко всем командам плагина BlockParty
+    children:
+      mv.bypass.gamemode.*: true
+  blockparty.spectator:
+    default: op
+    description: Доступ к команде /bp spectate для наблюдения за играми
+    children:
+      mv.bypass.gamemode.*: true
+      minecraft.command.spectate: true

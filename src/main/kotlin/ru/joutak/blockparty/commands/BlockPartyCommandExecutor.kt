@@ -27,7 +27,22 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     }
 
     private fun getUsageMessage(sender: CommandSender): Component {
-        if (sender is Player && !sender.isOp) {
+        if (sender.hasPermission("blockparty.admin")) {
+            return Component.text(
+                "/bp config <key> <value>\n" +
+                    "/bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
+                    "/bp remove <name>\n" +
+                    "/bp list\n" +
+                    "/bp info <name>\n" +
+                    "/bp ready\n" +
+                    "/bp spectate <name>",
+            )
+        } else if (sender.hasPermission("blockparty.spectator")) {
+            return Component.text(
+                "/bp ready\n" +
+                    "/bp spectate <name>",
+            )
+        } else if (sender is Player) {
             return LinearComponents.linear(
                 Component.text("/bp ready", NamedTextColor.GOLD),
                 Component.text(" - "),
@@ -38,14 +53,7 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
                 BlockPartyPlugin.TITLE,
             )
         } else {
-            return Component.text(
-                "/bp config <key> <value>\n" +
-                    "/bp create <name> <world> <x1> <y1> <z1> <x2> <y2> <z2>\n" +
-                    "/bp remove <name>\n" +
-                    "/bp list\n" +
-                    "/bp info <name>\n" +
-                    "/bp ready",
-            )
+            return Component.text("")
         }
     }
 
@@ -55,15 +63,24 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
         string: String,
         args: Array<out String>,
     ): Boolean {
-        if (args.getOrNull(0) in commands.keys &&
-            commands[args[0]]!!.execute(
-                sender,
-                command,
-                string,
-                if (args.size > 1) args.sliceArray(1 until args.size) else emptyArray(),
-            )
-        ) {
-            return true
+        val cmdStr = args.getOrNull(0)
+        val cmd = commands[cmdStr]
+
+        if (cmd != null) {
+            if (cmd.permission != null && !sender.hasPermission(cmd.permission)) {
+                sender.sendMessage("Недостаточно прав для использования данной команды.")
+                return true
+            }
+
+            if (commands[args[0]]!!.execute(
+                    sender,
+                    command,
+                    string,
+                    if (args.size > 1) args.sliceArray(1 until args.size) else emptyArray(),
+                )
+            ) {
+                return true
+            }
         }
 
         sender.sendMessage(getUsageMessage(sender))
@@ -78,19 +95,30 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
     ): List<String> {
         return when (args.size) {
             1 -> {
-                if (!sender.isOp) return listOf(BlockPartyReadyCommand.name)
-                return commands.keys.toList()
+                if (sender.hasPermission("blockparty.admin")) {
+                    return commands.keys.toList()
+                } else if (sender.hasPermission("blockparty.spectator")) {
+                    return listOf(BlockPartyReadyCommand.name, BlockPartySpectateCommand.name)
+                } else {
+                    return listOf(BlockPartyReadyCommand.name)
+                }
             }
             else -> {
-                if (args[0] !in commands.keys) {
+                val cmd = commands[args[0]]
+
+                if (cmd == null) {
                     emptyList()
                 } else {
-                    commands[args[0]]!!.getTabHint(
-                        sender,
-                        command,
-                        alias,
-                        args.sliceArray(1 until args.size),
-                    )
+                    if (cmd.permission == null || sender.hasPermission(cmd.permission)) {
+                        commands[args[0]]!!.getTabHint(
+                            sender,
+                            command,
+                            alias,
+                            args.sliceArray(1 until args.size),
+                        )
+                    } else {
+                        emptyList()
+                    }
                 }
             }
         }
