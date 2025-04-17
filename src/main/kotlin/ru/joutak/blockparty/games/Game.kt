@@ -129,6 +129,22 @@ class Game(
         arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
         phase = GamePhase.CHOOSE_BLOCK
 
+        for (player in onlinePlayers) {
+            Bukkit.getPlayer(player)?.inventory?.clear() ?: continue
+        }
+
+        if (round == Config.get(ConfigKeys.ROUND_TO_START_PVP)) {
+            allPlayersAudience.sendMessage(
+                LinearComponents.linear(
+                    Component.text("Игра затянулась... Используйте "),
+                    Component.text("снежки", NamedTextColor.WHITE, TextDecoration.BOLD),
+                    Component.text(", чтобы мешать "),
+                    Component.text("противникам", NamedTextColor.RED),
+                    Component.text("!"),
+                ),
+            )
+        }
+
         if (round == 1) {
             setTime(Config.get(ConfigKeys.TIME_BETWEEN_ROUNDS))
         } else {
@@ -148,8 +164,14 @@ class Game(
 
         for (player in onlinePlayers) {
             val inventory = Bukkit.getPlayer(player)?.inventory ?: continue
-            inventory.clear()
             for (slot in 0..8) {
+                if (round >= Config.get(ConfigKeys.ROUND_TO_START_PVP) && slot == 0) {
+                    inventory.setItem(
+                        0,
+                        ItemStack(Material.SNOWBALL, Config.get(ConfigKeys.NUMBER_OF_SNOWBALLS_ON_PVP)),
+                    )
+                    continue
+                }
                 inventory.setItem(slot, item)
             }
         }
@@ -177,7 +199,7 @@ class Game(
 
         for (playerUuid in onlinePlayers) {
             val inventory = Bukkit.getPlayer(playerUuid)?.inventory ?: continue
-            inventory.clear()
+            inventory.remove(currentBlock!!)
         }
 
         phase = GamePhase.CHECK_PLAYERS

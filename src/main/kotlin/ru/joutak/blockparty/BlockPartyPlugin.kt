@@ -12,6 +12,7 @@ import ru.joutak.blockparty.listeners.PlayerDropItemListener
 import ru.joutak.blockparty.listeners.PlayerJoinListener
 import ru.joutak.blockparty.listeners.PlayerMoveListener
 import ru.joutak.blockparty.listeners.PlayerQuitListener
+import ru.joutak.blockparty.listeners.ProjectileHitEventListener
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
 import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
@@ -63,6 +64,7 @@ class BlockPartyPlugin : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerMoveListener, instance)
         Bukkit.getPluginManager().registerEvents(PlayerDropItemListener, instance)
         Bukkit.getPluginManager().registerEvents(PlayerChangedWorldListener, instance)
+        Bukkit.getPluginManager().registerEvents(ProjectileHitEventListener, instance)
     }
 
     private fun registerCommands() {

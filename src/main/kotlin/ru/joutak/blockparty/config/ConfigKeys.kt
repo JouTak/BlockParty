@@ -7,8 +7,10 @@ object ConfigKeys {
     val MAX_ROUND_TIME = int("MAX_ROUND_TIME", 10)
     val MIN_ROUND_TIME = int("MIN_ROUND_TIME", 1)
     val NUMBER_OF_FLOORS = int("NUMBER_OF_FLOORS", 1)
+    val NUMBER_OF_SNOWBALLS_ON_PVP = int("NUMBER_OF_SNOWBALLS_ON_PVP", 4)
     val PLAYERS_TO_START = int("PLAYERS_TO_START", 8)
     val PLAYERS_TO_END = int("PLAYERS_TO_END", 1)
+    val ROUND_TO_START_PVP = int("ROUND_TO_START_PVP", 20)
     val TIME_BETWEEN_ROUNDS = int("TIME_BETWEEN_ROUNDS", 10)
     val TIME_TO_START_GAME_LOBBY = int("TIME_TO_START_GAME_LOBBY", 15)
 
@@ -20,8 +22,10 @@ object ConfigKeys {
             MAX_ROUND_TIME,
             MIN_ROUND_TIME,
             NUMBER_OF_FLOORS,
+            NUMBER_OF_SNOWBALLS_ON_PVP,
             PLAYERS_TO_START,
             PLAYERS_TO_END,
+            ROUND_TO_START_PVP,
             TIME_BETWEEN_ROUNDS,
             TIME_TO_START_GAME_LOBBY,
         )
