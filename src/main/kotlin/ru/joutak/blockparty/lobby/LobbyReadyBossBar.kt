@@ -11,7 +11,7 @@ object LobbyReadyBossBar {
     private val bars = mutableMapOf<UUID, BossBar>()
 
     fun removeAllBossBars() {
-        LobbyManager.getPlayers().forEach { it.activeBossBars().forEach { bar -> it.hideBossBar(bar) } }
+        LobbyManager.getPlayers().forEach { it.activeBossBars().toList().forEach { bar -> it.hideBossBar(bar) } }
     }
 
     fun checkLobby() {

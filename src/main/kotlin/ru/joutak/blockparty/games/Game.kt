@@ -25,8 +25,8 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
 
 class Game(
-    private val arena: Arena,
-    private val players: MutableList<UUID>,
+    val arena: Arena,
+    private val players: Iterable<UUID>,
 ) : Runnable {
     val uuid: UUID = UUID.randomUUID()
     private val scoreboard = GameScoreboard()
@@ -58,11 +58,12 @@ class Game(
             Bukkit.getPlayer(playerUuid)?.let {
                 PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
                 LobbyManager.removeFromReadyPlayers(it)
+                it.gameMode = GameMode.ADVENTURE
                 scoreboard.setFor(it)
             }
         }
 
-        logger.info("Игра началась в составе из ${players.size} игроков:\n${players.joinToString("\n")}")
+        logger.info("Игра началась в составе из ${players.count()} игроков:\n${players.joinToString("\n")}")
 
         taskId =
             Bukkit.getScheduler().scheduleSyncRepeatingTask(
@@ -272,6 +273,7 @@ class Game(
             Bukkit.getPlayer(playerUuid)?.let {
                 scoreboard.removeFor(it)
                 LobbyManager.teleportToLobby(it)
+                if (playerUuid in onlinePlayers) it.gameMode = GameMode.ADVENTURE
             }
         }
 
@@ -304,6 +306,25 @@ class Game(
         }
     }
 
+    fun addSpectator(player: Player) {
+        spectators.add(player.uniqueId)
+        player.teleport(arena.center)
+        player.gameMode = GameMode.SPECTATOR
+        musicManager.playCurrentSong(setOf(player.uniqueId))
+        scoreboard.setFor(player)
+        scoreboard.setBossBarTimer(setOf(player.uniqueId), phase, timeLeft, totalTime)
+
+        player.sendMessage("Вы наблюдаете за игрой на арене ${arena.name}.")
+    }
+
+    fun removeSpectator(player: Player) {
+        spectators.remove(player.uniqueId)
+        scoreboard.removeFor(player)
+        musicManager.stopFor(setOf(player.uniqueId))
+    }
+
+    fun hasSpectator(player: Player): Boolean = spectators.contains(player.uniqueId)
+
     private fun setTime(time: Int) {
         totalTime = time
         timeLeft = time - 1
@@ -325,7 +346,7 @@ class Game(
             }
         }
 
-    private fun getAvailablePlayers(): Iterable<UUID> = onlinePlayers + spectators
+    private fun getAvailablePlayers(): Iterable<UUID> = (onlinePlayers + spectators).toSet()
 
     fun getPhase(): GamePhase = this.phase
 

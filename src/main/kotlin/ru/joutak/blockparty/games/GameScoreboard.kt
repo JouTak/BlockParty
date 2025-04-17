@@ -15,7 +15,6 @@ import java.util.UUID
 class GameScoreboard {
     private val manager: ScoreboardManager = Bukkit.getScoreboardManager()
     private val scoreboard: Scoreboard = manager.newScoreboard
-    private var bossBar: BossBar? = null
     private val objective = scoreboard.registerNewObjective("game", Criteria.DUMMY, BlockPartyPlugin.TITLE)
 
     init {
@@ -26,7 +25,7 @@ class GameScoreboard {
         playersLeft: Int,
         round: Int,
     ) {
-        scoreboard.entries.forEach { scoreboard.resetScores(it) } // Очищаем старые данные
+        scoreboard.entries.forEach { scoreboard.resetScores(it) }
 
         objective.getScore("Раунд:").score = round
         objective.getScore("Оставшиеся игроки:").score = playersLeft
@@ -38,7 +37,7 @@ class GameScoreboard {
         timeLeft: Int,
         totalTime: Int,
     ) {
-        val newBossBar: BossBar? =
+        val bossBar =
             when (phase) {
                 GamePhase.ROUND_START,
                 GamePhase.BREAK_FLOOR,
@@ -58,19 +57,13 @@ class GameScoreboard {
                         BossBar.Color.WHITE,
                         BossBar.Overlay.PROGRESS,
                     )
-            }
+            } ?: return
 
         for (playerUuid in playersUuids) {
             val player = Bukkit.getPlayer(playerUuid) ?: continue
-            if (bossBar != null) {
-                player.hideBossBar(bossBar!!)
-            }
-
-            if (newBossBar != null) {
-                player.showBossBar(newBossBar)
-            }
+            player.activeBossBars().toList().forEach { player.hideBossBar(it) }
+            player.showBossBar(bossBar)
         }
-        bossBar = newBossBar
     }
 
     fun setFor(player: Player) {
@@ -79,6 +72,6 @@ class GameScoreboard {
 
     fun removeFor(player: Player) {
         player.scoreboard = manager.newScoreboard
-        player.hideBossBar(bossBar ?: return)
+        player.activeBossBars().toList().forEach { player.hideBossBar(it) }
     }
 }

@@ -20,6 +20,7 @@ object BlockPartyCommandExecutor : CommandExecutor, TabExecutor {
         registerCommand(BlockPartyInfoCommand)
         registerCommand(BlockPartyListCommand)
         registerCommand(BlockPartyReadyCommand)
+        registerCommand(BlockPartySpectateCommand)
     }
 
     private fun registerCommand(command: BlockPartyCommand) {

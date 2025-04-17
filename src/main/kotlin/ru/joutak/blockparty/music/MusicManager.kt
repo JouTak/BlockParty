@@ -29,6 +29,12 @@ class MusicManager {
         }
     }
 
+    fun playCurrentSong(playersUuids: Iterable<UUID>) {
+        if (isMusicPlaying) {
+            playFor(playersUuids)
+        }
+    }
+
     fun playNextSong(playersUuids: Iterable<UUID>) {
         if (isMusicPlaying) return
         musicName = music.random()
@@ -50,7 +56,7 @@ class MusicManager {
         }
     }
 
-    private fun stopFor(playersUuids: Iterable<UUID>) {
+    fun stopFor(playersUuids: Iterable<UUID>) {
         for (uuid in playersUuids) {
             Bukkit.getPlayer(uuid)?.stopSound("minecraft:$musicName", SoundCategory.RECORDS)
         }
