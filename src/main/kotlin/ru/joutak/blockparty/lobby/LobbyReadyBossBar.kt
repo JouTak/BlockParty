@@ -4,7 +4,6 @@ import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.players.PlayerData
-import ru.joutak.blockparty.players.PlayerState
 import java.util.UUID
 
 object LobbyReadyBossBar {
@@ -22,29 +21,23 @@ object LobbyReadyBossBar {
 
     fun setFor(player: Player) {
         val uuid = player.uniqueId
-        val state = PlayerData.get(uuid).state
+        val state = PlayerData.get(uuid).isReady()
 
         val text: String
         val color: BossBar.Color
         val progress: Float
 
         when (state) {
-            PlayerState.READY -> {
+            true -> {
                 text = "Готов к игре!"
                 color = BossBar.Color.GREEN
                 progress = 1.0f
             }
 
-            PlayerState.LOBBY -> {
+            false -> {
                 text = "Не готов :("
                 color = BossBar.Color.RED
                 progress = 1.0f
-            }
-
-            else -> {
-                text = ""
-                color = BossBar.Color.WHITE
-                progress = 0.0f
             }
         }
 

@@ -33,7 +33,7 @@ object BlockPartySpectateCommand : BlockPartyCommand("spectate", listOf("name"),
         }
 
         if (endSpectating) {
-            GameManager.get(sender).forEach { it.removeSpectator(sender) }
+            GameManager.getBySpectator(sender).forEach { it.removeSpectator(sender) }
             LobbyManager.teleportToLobby(sender)
             return true
         }
@@ -44,13 +44,13 @@ object BlockPartySpectateCommand : BlockPartyCommand("spectate", listOf("name"),
             sender.sendMessage("Арены с таким именем не существует.")
             return true
         }
-        val game = GameManager.get(arena)
+        val game = GameManager.getByArena(arena)
         if (game == null) {
             sender.sendMessage("В данный момент на арене не идет игра.")
             return true
         }
 
-        GameManager.get(sender).forEach { it.removeSpectator(sender) }
+        GameManager.getBySpectator(sender).forEach { it.removeSpectator(sender) }
         game.addSpectator(sender)
         return true
     }

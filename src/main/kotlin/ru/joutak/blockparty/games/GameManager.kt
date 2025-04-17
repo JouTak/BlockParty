@@ -31,9 +31,21 @@ object GameManager {
     /**
      * Returns current (if there is such) game in given arena
      */
-    fun get(arena: Arena): Game? {
+    fun getByArena(arena: Arena): Game? {
         for (game in games.values) {
-            if (game.arena == arena && game.getPhase() != GamePhase.FINISH) {
+            if (game.arena == arena) {
+                return game
+            }
+        }
+        return null
+    }
+
+    /**
+     * Returns current (if there is such) game which given player is playing
+     */
+    fun getByPlayer(player: Player): Game? {
+        for (game in games.values) {
+            if (game.hasPlayer(player)) {
                 return game
             }
         }
@@ -43,7 +55,7 @@ object GameManager {
     /**
      * Returns games (if there is such) which given spectator was/is watching
      */
-    fun get(spectator: Player): Iterable<Game> {
+    fun getBySpectator(spectator: Player): Iterable<Game> {
         val result = mutableListOf<Game>()
         for (game in games.values) {
             if (game.hasSpectator(spectator)) {
@@ -51,6 +63,15 @@ object GameManager {
             }
         }
         return result
+    }
+
+    fun isPlaying(playerUuid: UUID): Boolean {
+        for (game in games.values) {
+            if (game.hasPlayer(playerUuid)) {
+                return true
+            }
+        }
+        return false
     }
 
     fun remove(gameUuid: UUID) {

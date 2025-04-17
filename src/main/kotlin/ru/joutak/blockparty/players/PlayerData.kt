@@ -2,7 +2,8 @@ package ru.joutak.blockparty.players
 
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
-import ru.joutak.blockparty.arenas.Arena
+import ru.joutak.blockparty.games.GameManager
+import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 import java.io.FileNotFoundException
@@ -11,17 +12,17 @@ import java.util.UUID
 
 data class PlayerData(
     val playerUuid: UUID,
-    var state: PlayerState,
-    var currentArena: Arena?,
     val games: MutableList<UUID> = mutableListOf<UUID>(),
     var hasWon: Boolean = false,
 ) {
+    private var isReady: Boolean = false
+
     companion object {
         val playerDatas = mutableMapOf<UUID, PlayerData>()
         val dataFolder = File(PluginManager.blockParty.dataFolder, "players")
 
         private fun create(playerUuid: UUID): PlayerData {
-            playerDatas[playerUuid] = PlayerData(playerUuid, PlayerState.LOBBY, null)
+            playerDatas[playerUuid] = PlayerData(playerUuid)
             return playerDatas[playerUuid]!!
         }
 
@@ -37,11 +38,8 @@ data class PlayerData(
             return playerDatas[playerUuid]!!
         }
 
-        fun resetGame(playerUuid: UUID) {
+        fun resetPlayer(playerUuid: UUID) {
             val playerData = get(playerUuid)
-
-            playerData.state = PlayerState.LOBBY
-            playerData.currentArena = null
 
             val player = Bukkit.getPlayer(playerData.playerUuid) ?: return
             player.health = 20.0
@@ -85,8 +83,6 @@ data class PlayerData(
             playerDatas[uuid] =
                 PlayerData(
                     uuid,
-                    PlayerState.LOBBY,
-                    null,
                     (values["games"] as MutableList<String>).map { UUID.fromString(it) }.toMutableList(),
                     values["hasWon"] as Boolean,
                 )
@@ -100,7 +96,20 @@ data class PlayerData(
         }
     }
 
-    fun isInGame(): Boolean = currentArena != null && state == PlayerState.INGAME
+    fun isInGame(): Boolean = GameManager.isPlaying(playerUuid)
+
+    fun isInLobby(): Boolean =
+        Bukkit
+            .getPlayer(playerUuid)
+            ?.world
+            ?.name
+            .equals(LobbyManager.world.name)
+
+    fun isReady(): Boolean = isReady
+
+    fun setReady(ready: Boolean) {
+        isReady = ready
+    }
 
     fun saveData() {
         val file = File(dataFolder, "${this.playerUuid}.yml")

@@ -20,7 +20,6 @@ import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
-import ru.joutak.blockparty.players.PlayerState
 import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
 
@@ -52,8 +51,6 @@ class Game(
         for (playerUuid in players) {
             val playerData = PlayerData.get(playerUuid)
             playerData.games.add(this.uuid)
-            playerData.currentArena = this.arena
-            playerData.state = PlayerState.INGAME
             onlinePlayers.add(playerUuid)
             Bukkit.getPlayer(playerUuid)?.let {
                 PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
@@ -267,7 +264,7 @@ class Game(
         arena.reset()
         for (playerUuid in getAvailablePlayers()) {
             if (playerUuid in onlinePlayers) {
-                PlayerData.resetGame(playerUuid)
+                PlayerData.resetPlayer(playerUuid)
             }
 
             Bukkit.getPlayer(playerUuid)?.let {
@@ -324,6 +321,10 @@ class Game(
     }
 
     fun hasSpectator(player: Player): Boolean = spectators.contains(player.uniqueId)
+
+    fun hasPlayer(player: Player): Boolean = hasPlayer(player.uniqueId)
+
+    fun hasPlayer(playerUuid: UUID): Boolean = onlinePlayers.contains(playerUuid)
 
     private fun setTime(time: Int) {
         totalTime = time

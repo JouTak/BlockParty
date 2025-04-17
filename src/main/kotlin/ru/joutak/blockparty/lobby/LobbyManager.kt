@@ -17,7 +17,6 @@ import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.players.PlayerData
-import ru.joutak.blockparty.players.PlayerState
 import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
 import kotlin.math.min
@@ -80,6 +79,7 @@ object LobbyManager {
 
     fun removeFromReadyPlayers(player: Player) {
         readyPlayers.remove(player.uniqueId)
+        PlayerData.get(player.uniqueId).setReady(false)
     }
 
     fun getPlayers(): List<Player> = world.players
@@ -95,7 +95,7 @@ object LobbyManager {
 
     fun check() {
         for (player in world.players) {
-            if (PlayerData.get(player.uniqueId).state == PlayerState.READY) {
+            if (PlayerData.get(player.uniqueId).isReady()) {
                 readyPlayers.add(player.uniqueId)
             } else {
                 readyPlayers.remove(player.uniqueId)

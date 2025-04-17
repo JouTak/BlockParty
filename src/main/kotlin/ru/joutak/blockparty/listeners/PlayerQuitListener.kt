@@ -16,10 +16,10 @@ object PlayerQuitListener : Listener {
         event.quitMessage(null)
         val player = event.player
         val playerData = PlayerData.get(player.uniqueId)
-        val lastGame = GameManager.get(playerData.games.lastOrNull())
+        val lastGame = GameManager.getByPlayer(player)
 
         if (lastGame != null && lastGame.getPhase() != GamePhase.FINISH) {
-            PlayerData.resetGame(player.uniqueId)
+            PlayerData.resetPlayer(player.uniqueId)
             lastGame.checkPlayers()
         }
 

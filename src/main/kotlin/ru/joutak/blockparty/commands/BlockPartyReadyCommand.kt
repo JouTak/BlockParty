@@ -10,7 +10,6 @@ import ru.joutak.blockparty.BlockPartyPlugin
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
 import ru.joutak.blockparty.players.PlayerData
-import ru.joutak.blockparty.players.PlayerState
 
 object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
     override fun execute(
@@ -30,22 +29,9 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
 
         val playerData = PlayerData.get(sender.uniqueId)
 
-        when (playerData.state) {
-            PlayerState.LOBBY -> {
-                sender.sendMessage(
-                    LinearComponents.linear(
-                        Component.text("Вы "),
-                        Component.text("встали", NamedTextColor.GREEN),
-                        Component.text(" в очередь на "),
-                        BlockPartyPlugin.TITLE,
-                        Component.text("!"),
-                    ),
-                )
-                playerData.state = PlayerState.READY
-                LobbyManager.check()
-            }
-
-            PlayerState.READY -> {
+        if (playerData.isInLobby()) {
+            if (playerData.isReady()) {
+                playerData.setReady(false)
                 sender.sendMessage(
                     LinearComponents.linear(
                         Component.text("Вы "),
@@ -55,19 +41,22 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
                         Component.text("!"),
                     ),
                 )
-                playerData.state = PlayerState.LOBBY
-                LobbyManager.check()
+            } else {
+                playerData.setReady(true)
+                sender.sendMessage(
+                    LinearComponents.linear(
+                        Component.text("Вы "),
+                        Component.text("встали", NamedTextColor.GREEN),
+                        Component.text(" в очередь на "),
+                        BlockPartyPlugin.TITLE,
+                        Component.text("!"),
+                    ),
+                )
             }
-
-            PlayerState.INGAME -> sender.sendMessage("Данную команду можно использовать только в лобби.")
-        }
-
-        when (playerData.state) {
-            PlayerState.LOBBY, PlayerState.READY -> {
-                LobbyReadyBossBar.setFor(sender)
-            }
-
-            else -> {}
+            LobbyReadyBossBar.setFor(sender)
+            LobbyManager.check()
+        } else {
+            sender.sendMessage("Данную команду можно использовать только в лобби.")
         }
 
         return true

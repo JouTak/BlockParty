@@ -19,11 +19,12 @@ object PlayerMoveListener : Listener {
             return
         }
 
-        if (!playerData.currentArena!!.isInside(location) && player.gameMode != GameMode.SPECTATOR) {
-            val game = GameManager.get(playerData.games.lastOrNull()) ?: return
+        val game = GameManager.getByPlayer(player)!!
+        val arena = game.arena
 
+        if (!arena.isInside(location) && player.gameMode != GameMode.SPECTATOR) {
             if (game.getPhase() == GamePhase.FINISH) {
-                player.teleport(playerData.currentArena!!.center)
+                player.teleport(arena.center)
             } else {
                 game.knockout(player.uniqueId)
             }
