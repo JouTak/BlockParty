@@ -53,8 +53,8 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
                     ),
                 )
             }
-            LobbyReadyBossBar.setFor(sender)
             LobbyManager.check()
+            LobbyReadyBossBar.setFor(sender)
         } else {
             sender.sendMessage("Данную команду можно использовать только в лобби.")
         }

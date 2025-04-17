@@ -2,7 +2,10 @@ package ru.joutak.blockparty.lobby
 
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.LinearComponents
 import org.bukkit.entity.Player
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.players.PlayerData
 import java.util.UUID
 
@@ -29,13 +32,13 @@ object LobbyReadyBossBar {
 
         when (state) {
             true -> {
-                text = "Готов к игре!"
+                text = "Готов к игре! :) "
                 color = BossBar.Color.GREEN
                 progress = 1.0f
             }
 
             false -> {
-                text = "Не готов :("
+                text = "Не готов :( "
                 color = BossBar.Color.RED
                 progress = 1.0f
             }
@@ -43,7 +46,16 @@ object LobbyReadyBossBar {
 
         val bar =
             BossBar.bossBar(
-                Component.text(text),
+                LinearComponents.linear(
+                    Component.text(text),
+                    Component.text(
+                        "[${LobbyManager.getReadyPlayers().count()}/${
+                            Config.get(
+                                ConfigKeys.PLAYERS_TO_START,
+                            )
+                        }]",
+                    ),
+                ),
                 progress,
                 color,
                 BossBar.Overlay.PROGRESS,
