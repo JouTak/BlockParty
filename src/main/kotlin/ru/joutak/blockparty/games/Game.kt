@@ -226,9 +226,9 @@ class Game(
                         Bukkit.getServer().onlinePlayers,
                     ).sendMessage(
                         LinearComponents.linear(
-                            Component.text(if (winners.size == 1) "Победителем" else "Победителями" + " очередной игры в "),
+                            Component.text((if (winners.size == 1) "Победителем" else "Победителями") + " очередной игры в "),
                             BlockPartyPlugin.TITLE,
-                            Component.text(if (winners.size == 1) " стал" else " стали" + ":\n"),
+                            Component.text((if (winners.size == 1) " стал" else " стали") + ":\n"),
                             Component.text(
                                 winners.mapNotNull { Bukkit.getPlayer(it)?.name }.joinToString("\n"),
                                 NamedTextColor.WHITE,
