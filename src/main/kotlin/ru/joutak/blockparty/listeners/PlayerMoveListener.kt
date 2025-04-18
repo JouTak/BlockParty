@@ -29,5 +29,7 @@ object PlayerMoveListener : Listener {
                 game.knockout(player.uniqueId)
             }
         }
+
+        if (player.location.y < -64) player.teleport(arena.center)
     }
 }

@@ -21,6 +21,12 @@ data class PlayerData(
         val playerDatas = mutableMapOf<UUID, PlayerData>()
         val dataFolder = File(PluginManager.getDataFolder(), "players")
 
+        init {
+            if (!dataFolder.exists()) {
+                dataFolder.mkdirs()
+            }
+        }
+
         private fun create(playerUuid: UUID): PlayerData {
             playerDatas[playerUuid] = PlayerData(playerUuid)
             return playerDatas[playerUuid]!!
@@ -90,12 +96,6 @@ data class PlayerData(
         }
     }
 
-    init {
-        if (!dataFolder.exists()) {
-            dataFolder.mkdirs()
-        }
-    }
-
     fun isInGame(): Boolean = GameManager.isPlaying(playerUuid)
 
     fun isInLobby(): Boolean =
@@ -123,6 +123,8 @@ data class PlayerData(
             playerData.save(file)
         } catch (e: IOException) {
             PluginManager.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
+        } finally {
+            playerDatas.remove(this.playerUuid)
         }
     }
 

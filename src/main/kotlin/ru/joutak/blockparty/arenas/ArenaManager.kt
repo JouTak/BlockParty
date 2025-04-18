@@ -19,6 +19,8 @@ object ArenaManager {
 
     fun get(name: String): Arena? = arenas[name]
 
+    fun contains(name: String): Boolean = arenas.containsKey(name)
+
     fun getArenas(): Map<String, Arena> = arenas
 
     fun getReadyArena(): Arena? {

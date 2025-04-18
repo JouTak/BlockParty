@@ -199,7 +199,13 @@ class Game(
     }
 
     fun checkPlayers() {
-        for (playerUuid in onlinePlayers.filter { !PlayerData.get(it).isInGame() }) {
+        for (playerUuid in onlinePlayers.filter {
+            !Bukkit
+                .getPlayer(it)
+                ?.world
+                ?.name
+                .equals(arena.worldName)
+        }) {
             logger.info("Игрок $playerUuid вышел из игры!")
             Bukkit.getPlayer(playerUuid)?.let {
                 scoreboard.removeFor(it)

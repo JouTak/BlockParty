@@ -18,14 +18,13 @@ object PlayerQuitListener : Listener {
         val playerData = PlayerData.get(player.uniqueId)
         val lastGame = GameManager.getByPlayer(player)
 
-        if (lastGame != null && lastGame.getPhase() != GamePhase.FINISH) {
-            PlayerData.resetPlayer(player.uniqueId)
-            lastGame.checkPlayers()
-        }
-
         Bukkit.getScheduler().runTaskLater(
             PluginManager.blockParty,
             Runnable {
+                if (lastGame != null && lastGame.getPhase() != GamePhase.FINISH) {
+                    PlayerData.resetPlayer(player.uniqueId)
+                    lastGame.checkPlayers()
+                }
                 LobbyManager.removeFromReadyPlayers(player)
                 playerData.saveData()
                 LobbyManager.check()
