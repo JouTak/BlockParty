@@ -93,6 +93,8 @@ object LobbyManager {
                 .slice(0..<min(readyPlayers.size, Config.get(ConfigKeys.MAX_PLAYERS_IN_GAME))),
         )
 
+    fun getPlayersExceptReady(): List<Player> = world.players - readyPlayers.mapNotNull { Bukkit.getPlayer(it) }.toSet()
+
     fun check() {
         for (player in world.players) {
             if (PlayerData.get(player.uniqueId).isReady()) {
@@ -149,13 +151,24 @@ object LobbyManager {
                     PluginManager.blockParty,
                     Runnable {
                         if (timeLeft > 0) {
-                            getReadyPlayersAudience().sendMessage(
-                                LinearComponents.linear(
-                                    Component.text("Ваша игра начнется через "),
-                                    Component.text("$timeLeft", NamedTextColor.RED),
-                                    Component.text(" секунд!"),
-                                ),
-                            )
+                            if (timeLeft % 5 == 0 || timeLeft <= 3) {
+                                getReadyPlayersAudience().sendMessage(
+                                    LinearComponents.linear(
+                                        Component.text("Ваша игра начнется через "),
+                                        Component.text("$timeLeft", NamedTextColor.RED),
+                                        Component.text(" секунд!"),
+                                    ),
+                                )
+
+                                Audience.audience(getPlayersExceptReady()).sendMessage(
+                                    LinearComponents.linear(
+                                        Component.text("Следующая игра начнется через "),
+                                        Component.text("$timeLeft", NamedTextColor.RED),
+                                        Component.text(" секунд, успейте присоединиться!"),
+                                    ),
+                                )
+                            }
+
                             timeLeft--
                         } else {
                             GameManager.createNewGame().start()
