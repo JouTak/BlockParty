@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKey
 import ru.joutak.blockparty.config.ConfigKeys
+import ru.joutak.blockparty.games.SpartakiadaManager
 
 object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "value"), "blockparty.admin") {
     override fun execute(
@@ -35,6 +36,7 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
 
         if (get) {
             sender.sendMessage("Текущее значение ${key.path}: ${Config.get(key)}")
+            return true
         }
         // else if (set)
         val value = key.parse(args[1])
@@ -47,6 +49,11 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
         @Suppress("UNCHECKED_CAST")
         Config.set(key as ConfigKey<Any>, value)
         sender.sendMessage("Значение ${key.path} обновлено на $value.")
+
+        // Костыль чтобы не делать /reload confirm ;)
+        if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+            SpartakiadaManager.reload()
+        }
 
         return true
     }

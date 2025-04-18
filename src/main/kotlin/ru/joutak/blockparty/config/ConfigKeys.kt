@@ -11,6 +11,8 @@ object ConfigKeys {
     val PLAYERS_TO_START = int("PLAYERS_TO_START", 8)
     val PLAYERS_TO_END = int("PLAYERS_TO_END", 1)
     val ROUND_TO_START_PVP = int("ROUND_TO_START_PVP", 20)
+    val SPARTAKIADA_MODE = boolean("SPARTAKIADA_MODE", false)
+    val SPARTAKIADA_ATTEMPTS = int("SPARTAKIADA_ATTEMPTS", 2)
     val TIME_BETWEEN_ROUNDS = int("TIME_BETWEEN_ROUNDS", 10)
     val TIME_TO_START_GAME_LOBBY = int("TIME_TO_START_GAME_LOBBY", 15)
 
@@ -26,6 +28,7 @@ object ConfigKeys {
             PLAYERS_TO_START,
             PLAYERS_TO_END,
             ROUND_TO_START_PVP,
+            SPARTAKIADA_MODE,
             TIME_BETWEEN_ROUNDS,
             TIME_TO_START_GAME_LOBBY,
         )

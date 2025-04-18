@@ -1,5 +1,6 @@
 package ru.joutak.blockparty.games
 
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
@@ -17,8 +18,7 @@ class GameLogger(
     val game: Game,
 ) {
     companion object {
-        private val dataFolder = File(PluginManager.blockParty.dataFolder.path, "games")
-        private val winnersFile = File(PluginManager.blockParty.dataFolder.path, "winners.yml")
+        private val dataFolder = File(PluginManager.getDataFolder(), "games")
     }
 
     private val logger = Logger.getLogger("GAME/${game.uuid}")
@@ -29,7 +29,6 @@ class GameLogger(
 
     init {
         gameFolder.mkdirs()
-        winnersFile.createNewFile()
         resultFile.createNewFile()
         logFile.createNewFile()
         logFileHandler = FileHandler(logFile.absolutePath, true)
@@ -76,8 +75,10 @@ class GameLogger(
     }
 
     fun addWinners(winners: Iterable<UUID>) {
+        if (!Config.get(ConfigKeys.SPARTAKIADA_MODE)) return
         if (winners.count() == 0) return
-        winnersFile.appendText(winners.joinToString("\n") + "\n")
+
+        winners.map { Bukkit.getOfflinePlayer(it) }.forEach { SpartakiadaManager.markWinner(it) }
     }
 
     fun close() {

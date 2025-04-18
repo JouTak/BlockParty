@@ -19,7 +19,7 @@ data class PlayerData(
 
     companion object {
         val playerDatas = mutableMapOf<UUID, PlayerData>()
-        val dataFolder = File(PluginManager.blockParty.dataFolder, "players")
+        val dataFolder = File(PluginManager.getDataFolder(), "players")
 
         private fun create(playerUuid: UUID): PlayerData {
             playerDatas[playerUuid] = PlayerData(playerUuid)

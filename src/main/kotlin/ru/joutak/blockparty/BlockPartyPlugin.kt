@@ -7,9 +7,11 @@ import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
+import ru.joutak.blockparty.games.SpartakiadaManager
 import ru.joutak.blockparty.listeners.PlayerChangedWorldListener
 import ru.joutak.blockparty.listeners.PlayerDropItemListener
 import ru.joutak.blockparty.listeners.PlayerJoinListener
+import ru.joutak.blockparty.listeners.PlayerLoginListener
 import ru.joutak.blockparty.listeners.PlayerMoveListener
 import ru.joutak.blockparty.listeners.PlayerQuitListener
 import ru.joutak.blockparty.listeners.ProjectileHitEventListener
@@ -49,11 +51,13 @@ class BlockPartyPlugin : JavaPlugin() {
         registerCommands()
         LobbyReadyBossBar.removeAllBossBars()
         LobbyReadyBossBar.checkLobby()
+        SpartakiadaManager.watchParticipantsChanges()
 
         logger.info("Плагин ${pluginMeta.name} версии ${pluginMeta.version} включен!")
     }
 
     private fun loadData() {
+        SpartakiadaManager.reload()
         ArenaManager.loadArenas()
         MusicManager.loadMusic()
     }
@@ -65,6 +69,7 @@ class BlockPartyPlugin : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerDropItemListener, instance)
         Bukkit.getPluginManager().registerEvents(PlayerChangedWorldListener, instance)
         Bukkit.getPluginManager().registerEvents(ProjectileHitEventListener, instance)
+        Bukkit.getPluginManager().registerEvents(PlayerLoginListener, instance)
     }
 
     private fun registerCommands() {
@@ -75,10 +80,10 @@ class BlockPartyPlugin : JavaPlugin() {
      * Plugin shutdown logic
      */
     override fun onDisable() {
+        SpartakiadaManager.stopWatching()
         for (player in Bukkit.getOnlinePlayers()) {
             PlayerData.get(player.uniqueId).saveData()
         }
-
         ArenaManager.saveArenas()
     }
 }

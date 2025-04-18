@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.LinearComponents
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.Difficulty
 import org.bukkit.GameMode
@@ -16,6 +17,7 @@ import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.games.GameManager
+import ru.joutak.blockparty.games.SpartakiadaManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
@@ -67,7 +69,22 @@ object LobbyManager {
                 .spawnLocation,
         )
         LobbyReadyBossBar.setFor(player)
-        Audience.audience(player).sendMessage(
+        val audience = Audience.audience(player)
+
+        if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+            val attempts = SpartakiadaManager.getRemainingAttempts(player)
+            audience.showTitle(
+                Title.title(
+                    LinearComponents.linear(
+                        Component.text("$attempts ", NamedTextColor.GOLD, TextDecoration.BOLD),
+                        Component.text(if (attempts > 1) "попытки" else "попытка"),
+                    ),
+                    LinearComponents.linear(Component.text("У вас осталось, чтобы показать свое мастерство")),
+                ),
+            )
+        }
+
+        audience.sendMessage(
             LinearComponents.linear(
                 Component.text("Для игры в "),
                 BlockPartyPlugin.TITLE,

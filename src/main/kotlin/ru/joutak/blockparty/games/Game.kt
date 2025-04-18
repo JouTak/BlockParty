@@ -271,7 +271,29 @@ class Game(
             Bukkit.getPlayer(playerUuid)?.let {
                 scoreboard.removeFor(it)
                 LobbyManager.teleportToLobby(it)
+
                 if (playerUuid in onlinePlayers) it.gameMode = GameMode.ADVENTURE
+
+                if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+                    if (SpartakiadaManager.isWinner(it)) {
+                        it.kick(
+                            LinearComponents.linear(
+                                Component.text("Поздравляем, вы "),
+                                Component.text("прошли", NamedTextColor.GREEN),
+                                Component.text(" в следующий этап! "),
+                                Component.text("☆", NamedTextColor.YELLOW),
+                            ),
+                        )
+                    } else if (!SpartakiadaManager.hasAttempts(it)) {
+                        it.kick(
+                            LinearComponents.linear(
+                                Component.text("К сожалению, для вас cпартакиада "),
+                                Component.text("закончилась ", NamedTextColor.RED),
+                                Component.text("☹"),
+                            ),
+                        )
+                    }
+                }
             }
         }
 
