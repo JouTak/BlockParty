@@ -18,6 +18,7 @@ import ru.joutak.blockparty.arenas.Floors
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.lobby.LobbyManager
+import ru.joutak.blockparty.lobby.LobbyReadyBossBar
 import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.utils.PluginManager
@@ -59,7 +60,7 @@ class Game(
                 scoreboard.setFor(it)
             }
         }
-
+        LobbyReadyBossBar.checkLobby()
         logger.info("Игра началась в составе из ${players.count()} игроков:\n${players.joinToString("\n")}")
 
         taskId =
