@@ -2,24 +2,27 @@ package ru.joutak.blockparty.players
 
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.UUID
 
 data class PlayerData(
-    val playerUuid: UUID,
-    val games: MutableList<UUID> = mutableListOf<UUID>(),
-    var hasWon: Boolean = false,
+    val nickname: String,
+    private val games: MutableList<UUID> = mutableListOf(),
+    private var hasWon: Boolean = false,
 ) {
     private var isReady: Boolean = false
+    private val file = File(dataFolder, "${this.nickname}.yml")
+    private val playerData: YamlConfiguration
 
     companion object {
-        val playerDatas = mutableMapOf<UUID, PlayerData>()
-        val dataFolder = File(PluginManager.getDataFolder(), "players")
+        private val playerDatas = mutableMapOf<String, PlayerData>()
+        private var dataFolder = File(PluginManager.getDataFolder(), "players")
 
         init {
             if (!dataFolder.exists()) {
@@ -27,27 +30,18 @@ data class PlayerData(
             }
         }
 
-        private fun create(playerUuid: UUID): PlayerData {
-            playerDatas[playerUuid] = PlayerData(playerUuid)
-            return playerDatas[playerUuid]!!
-        }
+        fun get(playerUuid: UUID): PlayerData = get(Bukkit.getOfflinePlayer(playerUuid).name!!)
 
-        fun get(playerUuid: UUID): PlayerData {
-            if (playerDatas.containsKey(playerUuid)) {
-                return playerDatas[playerUuid]!!
-            } else if (containsInFolder(playerUuid)) {
-                loadFromFile(playerUuid)
-            } else {
-                create(playerUuid)
+        fun get(nickname: String): PlayerData {
+            if (!playerDatas.containsKey(nickname)) {
+                playerDatas[nickname] = PlayerData(nickname)
             }
 
-            return playerDatas[playerUuid]!!
+            return playerDatas[nickname]!!
         }
 
         fun resetPlayer(playerUuid: UUID) {
-            val playerData = get(playerUuid)
-
-            val player = Bukkit.getPlayer(playerData.playerUuid) ?: return
+            val player = Bukkit.getPlayer(playerUuid) ?: return
             player.health = 20.0
             player.foodLevel = 20
             player.inventory.clear()
@@ -55,52 +49,36 @@ data class PlayerData(
             player.exp = 0.0f
         }
 
-        fun contains(playerUuid: UUID): Boolean = playerDatas.containsKey(playerUuid) || containsInFolder(playerUuid)
-
-        private fun containsInFolder(playerUuid: UUID): Boolean {
-            val files = dataFolder.listFiles() ?: return false
-            for (file in files) {
-                if (file.isFile && file.name.equals("$playerUuid.yml")) {
-                    return true
-                }
-            }
-            return false
-        }
-
-        private fun loadFromFile(playerUuid: UUID) {
-            val fx = File(dataFolder, "$playerUuid.yml")
-            if (!fx.exists()) {
-                throw FileNotFoundException()
-            }
-
-            val dataFile = YamlConfiguration.loadConfiguration(fx)
-
-            try {
-                playerDatas[playerUuid] = deserialize(dataFile.getValues(true))
-            } catch (e: Exception) {
-                PluginManager.getLogger().severe("Ошибка при загрузке информации о игроке: ${e.message}")
-            }
-        }
-
-        fun deserialize(values: Map<String, Any>): PlayerData {
-            PluginManager.getLogger().info("Десериализация информации об игроке ${values["playerUuid"]}")
-            val uuid = UUID.fromString(values["playerUuid"] as String)
-
-            playerDatas[uuid] =
-                PlayerData(
-                    uuid,
-                    (values["games"] as MutableList<String>).map { UUID.fromString(it) }.toMutableList(),
-                    values["hasWon"] as Boolean,
-                )
-            return playerDatas[uuid]!!
+        fun reloadDatas() {
+            playerDatas.clear()
+            dataFolder = File(PluginManager.getDataFolder(), "players")
         }
     }
 
-    fun isInGame(): Boolean = GameManager.isPlaying(playerUuid)
+    init {
+        if (file.createNewFile()) {
+            playerData = YamlConfiguration()
+            playerData.set("nickname", nickname)
+            playerData.set("playerUuid", Bukkit.getOfflinePlayer(nickname).uniqueId.toString())
+            playerData.set("games", emptyList<String>())
+            playerData.set("maxRounds", 0)
+            playerData.set("hasWon", false)
+            playerData.set("hasBalls", false)
+            playerData.save(file)
+        } else {
+            playerData = YamlConfiguration.loadConfiguration(file)
+            for (game in playerData.get("games") as List<String>) {
+                games.add(UUID.fromString(game))
+            }
+            hasWon = playerData.get("hasWon") as Boolean
+        }
+    }
+
+    fun isInGame(): Boolean = GameManager.isPlaying(Bukkit.getOfflinePlayer(nickname).uniqueId)
 
     fun isInLobby(): Boolean =
         Bukkit
-            .getPlayer(playerUuid)
+            .getPlayer(nickname)
             ?.world
             ?.name
             .equals(LobbyManager.world.name)
@@ -111,27 +89,43 @@ data class PlayerData(
         isReady = ready
     }
 
+    fun hasWon(): Boolean = hasWon
+
+    fun hasWon(hasWon: Boolean) {
+        this.hasWon = hasWon
+        playerData.set("hasWon", hasWon)
+        playerData.save(file)
+        hasBalls()
+    }
+
+    fun addGame(gameUuid: UUID) {
+        games.add(gameUuid)
+        playerData.set("games", games.map { it.toString() })
+        playerData.save(file)
+        hasBalls()
+    }
+
+    fun setMaxRounds(rounds: Int) {
+        playerData.set("maxRounds", maxOf(playerData.get("maxRounds", 0) as Int, rounds))
+        playerData.save(file)
+    }
+
+    fun hasBalls(): Boolean {
+        val hasBalls = hasWon || (games.size >= Config.get(ConfigKeys.SPARTAKIADA_ATTEMPTS))
+        playerData.set("hasBalls", hasBalls)
+        playerData.save(file)
+        return hasBalls
+    }
+
+    fun getGames(): List<UUID> = games
+
     fun saveData() {
-        val file = File(dataFolder, "${this.playerUuid}.yml")
-        val playerData = YamlConfiguration()
-
-        for ((path, value) in get(this.playerUuid).serialize()) {
-            playerData.set(path, value)
-        }
-
         try {
             playerData.save(file)
         } catch (e: IOException) {
             PluginManager.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
         } finally {
-            playerDatas.remove(this.playerUuid)
+            playerDatas.remove(this.nickname)
         }
     }
-
-    fun serialize(): Map<String, Any> =
-        mapOf(
-            "playerUuid" to this.playerUuid.toString(),
-            "games" to this.games.map { it.toString() },
-            "hasWon" to this.hasWon,
-        )
 }

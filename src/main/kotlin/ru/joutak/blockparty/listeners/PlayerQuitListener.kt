@@ -13,7 +13,6 @@ import ru.joutak.blockparty.utils.PluginManager
 object PlayerQuitListener : Listener {
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
-        event.quitMessage(null)
         val player = event.player
         val playerData = PlayerData.get(player.uniqueId)
         val lastGame = GameManager.getByPlayer(player)

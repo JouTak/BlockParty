@@ -51,7 +51,7 @@ class Game(
 
         for (playerUuid in players) {
             val playerData = PlayerData.get(playerUuid)
-            playerData.games.add(this.uuid)
+            playerData.addGame(this.uuid)
             onlinePlayers.add(playerUuid)
             Bukkit.getPlayer(playerUuid)?.let {
                 PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
@@ -237,7 +237,7 @@ class Game(
                             BlockPartyPlugin.TITLE,
                             Component.text((if (winners.size == 1) " стал" else " стали") + ":\n"),
                             Component.text(
-                                winners.mapNotNull { Bukkit.getPlayer(it)?.name }.joinToString("\n"),
+                                winners.mapNotNull { Bukkit.getOfflinePlayer(it).name }.joinToString("\n"),
                                 NamedTextColor.WHITE,
                                 TextDecoration.BOLD,
                             ),
@@ -248,7 +248,10 @@ class Game(
             logger.info("Победителями стали:\n${winners.joinToString("\n")}")
             logger.addWinners(winners)
             for (winner in winners) {
-                PlayerData.get(winner).hasWon = true
+                PlayerData.get(winner).hasWon(true)
+            }
+            for (playerUuid in players) {
+                PlayerData.get(playerUuid).setMaxRounds(round)
             }
 
             phase = GamePhase.FINISH
@@ -276,11 +279,10 @@ class Game(
 
             Bukkit.getPlayer(playerUuid)?.let {
                 scoreboard.removeFor(it)
-                LobbyManager.teleportToLobby(it)
 
                 if (playerUuid in onlinePlayers) it.gameMode = GameMode.ADVENTURE
 
-                if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+                if (Config.get(ConfigKeys.SPARTAKIADA_MODE) && !SpartakiadaManager.canBypass(it)) {
                     if (SpartakiadaManager.isWinner(it)) {
                         it.kick(
                             LinearComponents.linear(
@@ -300,6 +302,8 @@ class Game(
                         )
                     }
                 }
+
+                LobbyManager.teleportToLobby(it)
             }
         }
 
@@ -379,6 +383,8 @@ class Game(
     private fun getAvailablePlayers(): Iterable<UUID> = (onlinePlayers + spectators).toSet()
 
     fun getPhase(): GamePhase = this.phase
+
+    fun getRounds(): Int = this.round
 
     fun serialize(): Map<String, Any> =
         mapOf(

@@ -16,6 +16,8 @@ object PlayerLoginListener : Listener {
 
         val player = event.player
 
+        if (SpartakiadaManager.canBypass(player)) return
+
         if (SpartakiadaManager.isWinner(player)) {
             event.disallow(
                 PlayerLoginEvent.Result.KICK_OTHER,

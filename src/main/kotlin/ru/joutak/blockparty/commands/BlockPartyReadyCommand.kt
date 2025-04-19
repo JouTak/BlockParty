@@ -7,6 +7,9 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import ru.joutak.blockparty.BlockPartyPlugin
+import ru.joutak.blockparty.config.Config
+import ru.joutak.blockparty.config.ConfigKeys
+import ru.joutak.blockparty.games.SpartakiadaManager
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
 import ru.joutak.blockparty.players.PlayerData
@@ -28,6 +31,18 @@ object BlockPartyReadyCommand : BlockPartyCommand("ready", emptyList()) {
         }
 
         val playerData = PlayerData.get(sender.uniqueId)
+
+        if (Config.get(ConfigKeys.SPARTAKIADA_MODE) && !SpartakiadaManager.hasAttempts(sender)) {
+            playerData.setReady(false)
+            sender.sendMessage(
+                LinearComponents.linear(
+                    Component.text("У вас закончились попытки для игры в "),
+                    BlockPartyPlugin.TITLE,
+                    Component.text("!"),
+                ),
+            )
+            return true
+        }
 
         if (playerData.isInLobby()) {
             if (playerData.isReady()) {

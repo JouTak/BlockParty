@@ -57,6 +57,7 @@ class BlockPartyPlugin : JavaPlugin() {
     }
 
     private fun loadData() {
+        PlayerData.reloadDatas()
         SpartakiadaManager.reload()
         ArenaManager.loadArenas()
         MusicManager.loadMusic()

@@ -9,7 +9,6 @@ import ru.joutak.blockparty.players.PlayerData
 object PlayerJoinListener : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
-        event.joinMessage(null)
         val player = event.player
         PlayerData.resetPlayer(player.uniqueId)
         LobbyManager.teleportToLobby(player)

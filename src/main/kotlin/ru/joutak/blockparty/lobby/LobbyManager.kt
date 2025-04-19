@@ -79,7 +79,7 @@ object LobbyManager {
                         Component.text("$attempts ", NamedTextColor.GOLD, TextDecoration.BOLD),
                         Component.text(if (attempts > 1) "попытки" else "попытка"),
                     ),
-                    LinearComponents.linear(Component.text("У вас осталось, чтобы показать свое мастерство")),
+                    LinearComponents.linear(Component.text("Чтобы показать свое мастерство")),
                 ),
             )
         }

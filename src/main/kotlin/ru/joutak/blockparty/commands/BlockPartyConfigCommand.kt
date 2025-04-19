@@ -6,6 +6,7 @@ import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKey
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.games.SpartakiadaManager
+import ru.joutak.blockparty.players.PlayerData
 
 object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "value"), "blockparty.admin") {
     override fun execute(
@@ -51,7 +52,8 @@ object BlockPartyConfigCommand : BlockPartyCommand("config", listOf("key", "valu
         sender.sendMessage("Значение ${key.path} обновлено на $value.")
 
         // Костыль чтобы не делать /reload confirm ;)
-        if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+        if (key.path.equals(ConfigKeys.SPARTAKIADA_MODE.path)) {
+            PlayerData.reloadDatas()
             SpartakiadaManager.reload()
         }
 

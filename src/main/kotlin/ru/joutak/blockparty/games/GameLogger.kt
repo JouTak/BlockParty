@@ -18,7 +18,7 @@ class GameLogger(
     val game: Game,
 ) {
     companion object {
-        private val dataFolder = File(PluginManager.getDataFolder(), "games")
+        val dataFolder = File(PluginManager.getDataFolder(), "games")
     }
 
     private val logger = Logger.getLogger("GAME/${game.uuid}")

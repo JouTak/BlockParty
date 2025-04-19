@@ -13,7 +13,6 @@ import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
-import java.util.UUID
 
 object SpartakiadaManager {
     val spartakiadaFolder = File(PluginManager.blockParty.dataFolder, "spartakiada")
@@ -21,7 +20,6 @@ object SpartakiadaManager {
     private val winnersFile = File(spartakiadaFolder, "winners.yml")
     private var watchThread: Thread? = null
     private val participants = mutableSetOf<String>()
-    private val winners = mutableSetOf<UUID>()
 
     val KICK_NON_PARTICIPANT_MESSAGE =
         LinearComponents.linear(
@@ -62,32 +60,33 @@ object SpartakiadaManager {
         }
     }
 
-    private fun loadWinners() {
-        val config = YamlConfiguration.loadConfiguration(winnersFile)
-        winners.clear()
-        config.getConfigurationSection("winners")?.getKeys(false)?.forEach {
-            runCatching { UUID.fromString(it) }.getOrNull()?.let { winners.add(it) }
-        }
-    }
-
     fun isParticipant(player: Player): Boolean = participants.contains(player.name)
 
-    fun hasAttempts(player: Player): Boolean = PlayerData.get(player.uniqueId).games.size < Config.get(ConfigKeys.SPARTAKIADA_ATTEMPTS)
+    fun hasAttempts(player: Player): Boolean {
+        val attempts = getRemainingAttempts(player)
+        return attempts > 0
+    }
 
-    fun getRemainingAttempts(player: Player): Int = Config.get(ConfigKeys.SPARTAKIADA_ATTEMPTS) - PlayerData.get(player.uniqueId).games.size
+    fun getRemainingAttempts(player: Player): Int =
+        Config.get(ConfigKeys.SPARTAKIADA_ATTEMPTS) - PlayerData.get(player.uniqueId).getGames().size
 
-    fun isWinner(player: Player): Boolean = winners.contains(player.uniqueId)
+    fun isWinner(player: Player): Boolean {
+        if (PlayerData.get(player.uniqueId).hasWon()) {
+            markWinner(player)
+            return true
+        }
+        return false
+    }
 
     fun markWinner(player: OfflinePlayer) {
-        winners.add(player.uniqueId)
         val config = YamlConfiguration.loadConfiguration(winnersFile)
-        config.set("winners.${player.uniqueId}", player.name)
+        if (config.contains("${player.name}", false)) return
+        config.set("${player.name}.playerUuid", player.uniqueId.toString())
         config.save(winnersFile)
     }
 
     fun reload() {
         loadParticipants()
-        loadWinners()
         checkPlayers()
     }
 
@@ -100,7 +99,12 @@ object SpartakiadaManager {
         }
     }
 
+    fun canBypass(player: Player): Boolean =
+        player.isOp || player.hasPermission("blockparty.admin") || player.hasPermission("blockparty.spectator")
+
     fun checkPlayer(player: Player) {
+        if (canBypass(player)) return
+
         if (isWinner(player)) {
             player.kick(
                 KICK_WINNER_MESSAGE,
