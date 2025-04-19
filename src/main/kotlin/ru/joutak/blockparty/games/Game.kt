@@ -248,7 +248,7 @@ class Game(
             logger.info("Победителями стали:\n${winners.joinToString("\n")}")
             logger.addWinners(winners)
             for (winner in winners) {
-                PlayerData.get(winner).hasWon(true)
+                PlayerData.get(winner).setWin()
             }
             for (playerUuid in players) {
                 PlayerData.get(playerUuid).setMaxRounds(round)
@@ -376,7 +376,7 @@ class Game(
             if (Bukkit.getPlayer(it) == null) {
                 false
             } else {
-                PlayerData.get(it).isInGame() && Bukkit.getPlayer(it)!!.gameMode == GameMode.ADVENTURE
+                Bukkit.getPlayer(it)!!.gameMode == GameMode.ADVENTURE
             }
         }
 

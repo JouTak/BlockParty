@@ -6,7 +6,7 @@ import java.io.File
 import java.io.IOException
 
 object ArenaManager {
-    private val arenasFile = File(PluginManager.blockParty.dataFolder, "arenas.yml")
+    private val arenasFile = File(PluginManager.getDataFolder(), "arenas.yml")
     private val arenas = mutableMapOf<String, Arena>()
 
     fun add(arena: Arena) {

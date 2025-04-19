@@ -15,9 +15,9 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 
 object SpartakiadaManager {
-    val spartakiadaFolder = File(PluginManager.blockParty.dataFolder, "spartakiada")
-    private val participantsFile = File(PluginManager.blockParty.dataFolder, "participants.yml")
-    private val winnersFile = File(spartakiadaFolder, "winners.yml")
+    val spartakiadaFolder = File(PluginManager.getDataFolder(), "spartakiada").apply { mkdirs() }
+    private val participantsFile = File(PluginManager.getDataFolder(), "participants.yml")
+    private val winnersFile = File(spartakiadaFolder, "winners.yml").apply { createNewFile() }
     private var watchThread: Thread? = null
     private val participants = mutableSetOf<String>()
 
@@ -45,11 +45,10 @@ object SpartakiadaManager {
         )
 
     init {
-        spartakiadaFolder.mkdirs()
         if (!participantsFile.exists()) {
             PluginManager.blockParty.saveResource("participants.yml", true)
         }
-        winnersFile.createNewFile()
+        loadParticipants()
     }
 
     private fun loadParticipants() {
@@ -71,7 +70,7 @@ object SpartakiadaManager {
         Config.get(ConfigKeys.SPARTAKIADA_ATTEMPTS) - PlayerData.get(player.uniqueId).getGames().size
 
     fun isWinner(player: Player): Boolean {
-        if (PlayerData.get(player.uniqueId).hasWon()) {
+        if (PlayerData.get(player.uniqueId).isWinner()) {
             markWinner(player)
             return true
         }
@@ -109,12 +108,18 @@ object SpartakiadaManager {
             player.kick(
                 KICK_WINNER_MESSAGE,
             )
-        } else if (!hasAttempts(player)) {
+            return
+        }
+
+        if (!hasAttempts(player)) {
             player.kick(
                 KICK_NO_ATTEMPTS_MESSAGE,
                 PlayerKickEvent.Cause.WHITELIST,
             )
-        } else if (!isParticipant(player)) {
+            return
+        }
+
+        if (!isParticipant(player)) {
             player.kick(
                 KICK_NON_PARTICIPANT_MESSAGE,
                 PlayerKickEvent.Cause.WHITELIST,
@@ -144,7 +149,7 @@ object SpartakiadaManager {
                             PluginManager
                                 .getLogger()
                                 .info("Обнаружено изменение participants.yml, перезагрузка списка участников...")
-                            loadParticipants()
+                            reload()
                             // PluginManager.getLogger().info(participants.joinToString("\n"))
                         }
                     }

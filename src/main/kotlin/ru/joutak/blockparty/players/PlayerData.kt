@@ -4,41 +4,36 @@ import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
-import ru.joutak.blockparty.games.GameManager
+import ru.joutak.blockparty.games.SpartakiadaManager
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 data class PlayerData(
-    val nickname: String,
+    val playerUuid: UUID,
     private val games: MutableList<UUID> = mutableListOf(),
     private var hasWon: Boolean = false,
 ) {
-    private var isReady: Boolean = false
-    private val file = File(dataFolder, "${this.nickname}.yml")
-    private val playerData: YamlConfiguration
+    private val dataFolder: File by lazy {
+        val root =
+            if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+                SpartakiadaManager.spartakiadaFolder
+            } else {
+                PluginManager.blockParty.dataFolder
+            }
+
+        File(root, "players").apply { mkdirs() }
+    }
 
     companion object {
-        private val playerDatas = mutableMapOf<String, PlayerData>()
-        private var dataFolder = File(PluginManager.getDataFolder(), "players")
+        private val cache = ConcurrentHashMap<UUID, PlayerData>()
 
-        init {
-            if (!dataFolder.exists()) {
-                dataFolder.mkdirs()
-            }
-        }
+        fun get(uuid: UUID) = cache.getOrPut(uuid) { PlayerData(uuid) }
 
-        fun get(playerUuid: UUID): PlayerData = get(Bukkit.getOfflinePlayer(playerUuid).name!!)
-
-        fun get(nickname: String): PlayerData {
-            if (!playerDatas.containsKey(nickname)) {
-                playerDatas[nickname] = PlayerData(nickname)
-            }
-
-            return playerDatas[nickname]!!
-        }
+        fun reloadDatas() = cache.clear()
 
         fun resetPlayer(playerUuid: UUID) {
             val player = Bukkit.getPlayer(playerUuid) ?: return
@@ -48,37 +43,40 @@ data class PlayerData(
             player.level = 0
             player.exp = 0.0f
         }
-
-        fun reloadDatas() {
-            playerDatas.clear()
-            dataFolder = File(PluginManager.getDataFolder(), "players")
-        }
     }
+
+    private var isReady: Boolean = false
+    private var file = File(dataFolder, "$playerUuid.yml")
+    private val yaml: YamlConfiguration
 
     init {
-        if (file.createNewFile()) {
-            playerData = YamlConfiguration()
-            playerData.set("nickname", nickname)
-            playerData.set("playerUuid", Bukkit.getOfflinePlayer(nickname).uniqueId.toString())
-            playerData.set("games", emptyList<String>())
-            playerData.set("maxRounds", 0)
-            playerData.set("hasWon", false)
-            playerData.set("hasBalls", false)
-            playerData.save(file)
-        } else {
-            playerData = YamlConfiguration.loadConfiguration(file)
-            for (game in playerData.get("games") as List<String>) {
-                games.add(UUID.fromString(game))
+        file.parentFile?.let { parent ->
+            if (!parent.exists()) {
+                parent.mkdirs()
             }
-            hasWon = playerData.get("hasWon") as Boolean
+        }
+
+        if (file.createNewFile()) {
+            yaml = YamlConfiguration()
+            yaml.set("nickname", Bukkit.getOfflinePlayer(playerUuid).name)
+            yaml.set("playerUuid", playerUuid.toString())
+            yaml.set("games", emptyList<String>())
+            yaml.set("hasWon", false)
+            if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+                yaml.set("hasBalls", false)
+                yaml.set("maxRounds", 0)
+            }
+            yaml.save(file)
+        } else {
+            yaml = YamlConfiguration.loadConfiguration(file)
+            yaml.getStringList("games").forEach { games += UUID.fromString(it) }
+            hasWon = yaml.getBoolean("hasWon")
         }
     }
-
-    fun isInGame(): Boolean = GameManager.isPlaying(Bukkit.getOfflinePlayer(nickname).uniqueId)
 
     fun isInLobby(): Boolean =
         Bukkit
-            .getPlayer(nickname)
+            .getPlayer(playerUuid)
             ?.world
             ?.name
             .equals(LobbyManager.world.name)
@@ -89,43 +87,47 @@ data class PlayerData(
         isReady = ready
     }
 
-    fun hasWon(): Boolean = hasWon
+    fun isWinner(): Boolean = hasWon
 
-    fun hasWon(hasWon: Boolean) {
-        this.hasWon = hasWon
-        playerData.set("hasWon", hasWon)
-        playerData.save(file)
-        hasBalls()
+    fun setWin() {
+        this.hasWon = true
+        yaml.set("hasWon", hasWon)
+        yaml.save(file)
+        setBalls()
     }
 
     fun addGame(gameUuid: UUID) {
         games.add(gameUuid)
-        playerData.set("games", games.map { it.toString() })
-        playerData.save(file)
-        hasBalls()
+        yaml.set("games", games.map { it.toString() })
+        yaml.save(file)
+        setBalls()
     }
 
     fun setMaxRounds(rounds: Int) {
-        playerData.set("maxRounds", maxOf(playerData.get("maxRounds", 0) as Int, rounds))
-        playerData.save(file)
+        if (!Config.get(ConfigKeys.SPARTAKIADA_MODE)) return
+
+        yaml.set("maxRounds", maxOf(yaml.get("maxRounds", 0) as Int, rounds))
+        yaml.save(file)
     }
 
-    fun hasBalls(): Boolean {
+    fun setBalls() {
+        if (!Config.get(ConfigKeys.SPARTAKIADA_MODE)) return
+
         val hasBalls = hasWon || (games.size >= Config.get(ConfigKeys.SPARTAKIADA_ATTEMPTS))
-        playerData.set("hasBalls", hasBalls)
-        playerData.save(file)
-        return hasBalls
+        yaml.set("hasBalls", hasBalls)
+        yaml.save(file)
     }
 
     fun getGames(): List<UUID> = games
 
-    fun saveData() {
+    fun save() {
         try {
-            playerData.save(file)
+            yaml.set("nickname", Bukkit.getOfflinePlayer(playerUuid).name)
+            yaml.save(file)
         } catch (e: IOException) {
             PluginManager.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
         } finally {
-            playerDatas.remove(this.nickname)
+            cache.remove(playerUuid)
         }
     }
 }

@@ -6,16 +6,14 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import ru.joutak.blockparty.games.GameManager
 import ru.joutak.blockparty.games.GamePhase
-import ru.joutak.blockparty.players.PlayerData
 
 object PlayerMoveListener : Listener {
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         val player = event.player
         val location = player.location
-        val playerData = PlayerData.get(player.uniqueId)
 
-        if (!playerData.isInGame()) {
+        if (!GameManager.isPlaying(player.uniqueId)) {
             return
         }
 

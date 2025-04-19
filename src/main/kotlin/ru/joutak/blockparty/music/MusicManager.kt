@@ -12,7 +12,7 @@ class MusicManager {
     private var musicName = music.random()
 
     companion object {
-        private val musicFile = File(PluginManager.blockParty.dataFolder, "music.yml")
+        private val musicFile = File(PluginManager.getDataFolder(), "music.yml")
         private val music = mutableListOf<String>()
 
         fun loadMusic() {

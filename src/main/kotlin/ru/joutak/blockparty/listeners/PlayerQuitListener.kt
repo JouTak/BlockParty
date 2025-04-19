@@ -25,7 +25,7 @@ object PlayerQuitListener : Listener {
                     lastGame.checkPlayers()
                 }
                 LobbyManager.removeFromReadyPlayers(player)
-                playerData.saveData()
+                playerData.save()
                 LobbyManager.check()
             },
             5L,

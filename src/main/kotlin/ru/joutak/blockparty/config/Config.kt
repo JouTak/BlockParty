@@ -5,7 +5,7 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 
 object Config {
-    private val configFile = File(PluginManager.blockParty.dataFolder, "config.yml")
+    private val configFile = File(PluginManager.getDataFolder(), "config.yml")
     private val config: YamlConfiguration
 
     init {

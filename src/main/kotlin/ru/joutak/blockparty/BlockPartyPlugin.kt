@@ -83,7 +83,7 @@ class BlockPartyPlugin : JavaPlugin() {
     override fun onDisable() {
         SpartakiadaManager.stopWatching()
         for (player in Bukkit.getOnlinePlayers()) {
-            PlayerData.get(player.uniqueId).saveData()
+            PlayerData.get(player.uniqueId).save()
         }
         ArenaManager.saveArenas()
     }

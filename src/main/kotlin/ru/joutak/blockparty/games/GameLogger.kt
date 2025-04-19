@@ -17,8 +17,15 @@ import java.util.logging.SimpleFormatter
 class GameLogger(
     val game: Game,
 ) {
-    companion object {
-        val dataFolder = File(PluginManager.getDataFolder(), "games")
+    private val dataFolder: File by lazy {
+        val root =
+            if (Config.get(ConfigKeys.SPARTAKIADA_MODE)) {
+                SpartakiadaManager.spartakiadaFolder
+            } else {
+                PluginManager.blockParty.dataFolder
+            }
+
+        File(root, "games").apply { mkdirs() }
     }
 
     private val logger = Logger.getLogger("GAME/${game.uuid}")

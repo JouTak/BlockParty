@@ -23,16 +23,23 @@ object PlayerLoginListener : Listener {
                 PlayerLoginEvent.Result.KICK_OTHER,
                 SpartakiadaManager.KICK_WINNER_MESSAGE,
             )
-        } else if (!SpartakiadaManager.hasAttempts(player)) {
+            return
+        }
+
+        if (!SpartakiadaManager.hasAttempts(player)) {
             event.disallow(
                 PlayerLoginEvent.Result.KICK_WHITELIST,
                 SpartakiadaManager.KICK_NO_ATTEMPTS_MESSAGE,
             )
-        } else if (!SpartakiadaManager.isParticipant(player)) {
+            return
+        }
+
+        if (!SpartakiadaManager.isParticipant(player)) {
             event.disallow(
                 PlayerLoginEvent.Result.KICK_WHITELIST,
                 SpartakiadaManager.KICK_NON_PARTICIPANT_MESSAGE,
             )
+            return
         }
     }
 }
