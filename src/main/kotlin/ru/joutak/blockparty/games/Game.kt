@@ -107,17 +107,8 @@ class Game(
 
     private fun startNewRound() {
         logger.info("Раунд $round начался")
-        val allPlayersAudience =
-            Audience.audience(getAvailablePlayers().mapNotNull { Bukkit.getPlayer(it) })
 
-        allPlayersAudience.showTitle(
-            Title.title(
-                LinearComponents.linear(
-                    Component.text("Раунд $round", NamedTextColor.NAMES.values().random()),
-                ),
-                LinearComponents.linear(),
-            ),
-        )
+        scoreboard.showNewRoundTitle(getAvailablePlayers(), round)
 
         arena.setCurrentFloorId(Floors.setRandomFloorAt(arena))
         phase = GamePhase.CHOOSE_BLOCK
@@ -127,7 +118,7 @@ class Game(
         }
 
         if (round == Config.get(ConfigKeys.ROUND_TO_START_PVP)) {
-            allPlayersAudience.sendMessage(
+            Audience.audience(getAvailablePlayers().mapNotNull { Bukkit.getPlayer(it) }).sendMessage(
                 LinearComponents.linear(
                     Component.text("Игра затянулась... Используйте "),
                     Component.text("снежки", NamedTextColor.WHITE, TextDecoration.BOLD),

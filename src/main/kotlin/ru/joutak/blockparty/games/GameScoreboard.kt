@@ -1,8 +1,10 @@
 package ru.joutak.blockparty.games
 
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.LinearComponents
+import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
@@ -10,6 +12,7 @@ import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.ScoreboardManager
 import ru.joutak.blockparty.BlockPartyPlugin
+import ru.joutak.blockparty.utils.TextColors
 import java.util.UUID
 
 class GameScoreboard {
@@ -57,13 +60,30 @@ class GameScoreboard {
                         BossBar.Color.WHITE,
                         BossBar.Overlay.PROGRESS,
                     )
-            } ?: return
+            }
 
         for (playerUuid in playersUuids) {
             val player = Bukkit.getPlayer(playerUuid) ?: continue
             player.activeBossBars().toList().forEach { player.hideBossBar(it) }
-            player.showBossBar(bossBar)
+            player.showBossBar(bossBar ?: continue)
         }
+    }
+
+    fun showNewRoundTitle(
+        playersUuids: Iterable<UUID>,
+        round: Int,
+    ) {
+        val allPlayersAudience =
+            Audience.audience(playersUuids.mapNotNull { Bukkit.getPlayer(it) })
+
+        allPlayersAudience.showTitle(
+            Title.title(
+                LinearComponents.linear(
+                    Component.text("Раунд $round", TextColors.getRandom()),
+                ),
+                LinearComponents.linear(),
+            ),
+        )
     }
 
     fun setFor(player: Player) {
