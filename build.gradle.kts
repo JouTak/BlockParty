@@ -1,14 +1,16 @@
-group = "ru.joutak"
-version = System.getProperty("version")
-val commitHash = System.getProperty("commitHash")
-if (commitHash.isNotBlank()) {
-    version = "$version-$commitHash"
-}
+val group: String by project
+val version: String by project
+val minecraftVersion: String by project
+val jdkVersion: String by project
+val kotlinVersion: String by project
+val multiverseVersion: String by project
 
-val targetJavaVersion = 21
+project.group = group
+project.version = version
+
 plugins {
-    kotlin("jvm") version "2.1.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.jetbrains.kotlin.jvm")
+    id("com.gradleup.shadow")
 }
 
 repositories {
@@ -19,26 +21,27 @@ repositories {
     maven("https://oss.sonatype.org/content/groups/public/") {
         name = "sonatype"
     }
-    maven("https://repo.onarandombox.com/content/groups/public/")
+    maven("https://repo.onarandombox.com/content/groups/public/") {
+        name = "multiverse"
+    }
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
-    compileOnly("com.onarandombox.multiversecore:multiverse-core:4.3.14")
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly("io.papermc.paper:paper-api:$minecraftVersion-R0.1-SNAPSHOT")
+    compileOnly("com.onarandombox.multiversecore:multiverse-core:$multiverseVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
 }
 
 kotlin {
-    jvmToolchain(targetJavaVersion)
+    jvmToolchain(jdkVersion.toInt())
 }
 
 tasks.shadowJar {
     archiveClassifier = ""
-    archiveFileName.set("${project.name}.jar")
+    archiveFileName.set("${project.name}-${project.version}.jar")
 
     val serverPath = System.getenv("SERVER_PATH")
-    if (System.getenv("TESTING") != null) {
+    if (System.getenv("TEST_PLUGIN_BUILD") != null) {
         if (serverPath != null) {
             destinationDirectory.set(file("$serverPath\\plugins"))
         } else {
@@ -53,7 +56,13 @@ tasks.jar {
 }
 
 tasks.processResources {
-    val props = mapOf("version" to version)
+    val props =
+        mapOf(
+            "NAME" to project.name,
+            "VERSION" to project.version,
+            "MINECRAFT_VERSION" to minecraftVersion,
+            "KOTLIN_VERSION" to kotlinVersion,
+        )
     inputs.properties(props)
     filteringCharset = "UTF-8"
     filesMatching("plugin.yml") {
