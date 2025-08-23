@@ -4,6 +4,7 @@ val minecraftVersion: String by project
 val jdkVersion: String by project
 val kotlinVersion: String by project
 val multiverseVersion: String by project
+val hopliteVersion: String by project
 
 project.group = group
 project.version = version
@@ -30,6 +31,9 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:$minecraftVersion-R0.1-SNAPSHOT")
     compileOnly("com.onarandombox.multiversecore:multiverse-core:$multiverseVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
+    compileOnly("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
+    compileOnly("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
+    compileOnly("com.sksamuel.hoplite:hoplite-watch:$hopliteVersion")
 }
 
 kotlin {
@@ -62,6 +66,7 @@ tasks.processResources {
             "VERSION" to project.version,
             "MINECRAFT_VERSION" to minecraftVersion,
             "KOTLIN_VERSION" to kotlinVersion,
+            "HOPLITE_VERSION" to hopliteVersion,
         )
     inputs.properties(props)
     filteringCharset = "UTF-8"

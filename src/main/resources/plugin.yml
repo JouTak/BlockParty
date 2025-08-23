@@ -9,6 +9,9 @@ website: https://joutak.ru
 depend: [ 'Multiverse-Core' ]
 libraries:
   - "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+  - "com.sksamuel.hoplite:hoplite-core:$HOPLITE_VERSION"
+  - "com.sksamuel.hoplite:hoplite-yaml:$HOPLITE_VERSION"
+  - "com.sksamuel.hoplite:hoplite-watch:$HOPLITE_VERSION"
 
 commands:
   bp:
