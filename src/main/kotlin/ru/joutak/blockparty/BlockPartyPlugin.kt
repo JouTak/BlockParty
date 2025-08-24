@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.LinearComponents
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
+import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.plugin.java.JavaPlugin
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.commands.BlockPartyCommandExecutor
@@ -16,7 +17,9 @@ import ru.joutak.blockparty.listeners.PlayerMoveListener
 import ru.joutak.blockparty.listeners.PlayerQuitListener
 import ru.joutak.blockparty.listeners.ProjectileHitEventListener
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
+import ru.joutak.blockparty.music.Music
 import ru.joutak.blockparty.music.MusicManager
+import ru.joutak.blockparty.music.MusicPlayer
 import ru.joutak.blockparty.players.PlayerData
 
 class BlockPartyPlugin : JavaPlugin() {
@@ -57,10 +60,12 @@ class BlockPartyPlugin : JavaPlugin() {
     }
 
     private fun loadData() {
+        ConfigurationSerialization.registerClass(Music::class.java, "Music")
+
         PlayerData.reloadDatas()
         SpartakiadaManager.reload()
         ArenaManager.loadArenas()
-        MusicManager.loadMusic()
+        MusicManager.load()
     }
 
     private fun registerEvents() {

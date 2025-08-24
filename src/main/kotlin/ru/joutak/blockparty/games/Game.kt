@@ -19,7 +19,7 @@ import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
-import ru.joutak.blockparty.music.MusicManager
+import ru.joutak.blockparty.music.MusicPlayer
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.utils.PluginManager
 import java.util.UUID
@@ -31,7 +31,7 @@ class Game(
     val uuid: UUID = UUID.randomUUID()
     private val scoreboard = GameScoreboard()
     private val logger = GameLogger(this)
-    private val musicManager = MusicManager()
+    private val musicPlayer = MusicPlayer()
     private val onlinePlayers = mutableSetOf<UUID>()
     private val winners = mutableSetOf<UUID>()
     private val spectators = mutableSetOf<UUID>()
@@ -83,11 +83,11 @@ class Game(
     private fun handleMusic() {
         when (phase) {
             GamePhase.ROUND_START -> {
-                musicManager.playNextSong(getAvailablePlayers())
+                musicPlayer.playNextSong(getAvailablePlayers())
             }
 
             GamePhase.BREAK_FLOOR, GamePhase.CHECK_PLAYERS, GamePhase.FINISH -> {
-                musicManager.stopSong(getAvailablePlayers())
+                musicPlayer.stopSong(getAvailablePlayers())
             }
 
             else -> {}
@@ -331,7 +331,7 @@ class Game(
         spectators.add(player.uniqueId)
         player.teleport(arena.center)
         player.gameMode = GameMode.SPECTATOR
-        musicManager.playCurrentSong(setOf(player.uniqueId))
+        musicPlayer.playCurrentSong(setOf(player.uniqueId))
         scoreboard.setFor(player)
         scoreboard.setBossBarTimer(setOf(player.uniqueId), phase, timeLeft, totalTime)
 
@@ -341,7 +341,7 @@ class Game(
     fun removeSpectator(player: Player) {
         spectators.remove(player.uniqueId)
         scoreboard.removeFor(player)
-        musicManager.stopFor(setOf(player.uniqueId))
+        musicPlayer.stopFor(setOf(player.uniqueId))
     }
 
     fun hasSpectator(player: Player): Boolean = spectators.contains(player.uniqueId)

@@ -1,79 +1,212 @@
-music:
-  - music.bp.allstar
-  - music.bp.angelwithashotgun
-  - music.bp.aroundtheworld
-  - music.bp.aureacarmina
-  - music.bp.axelf
-  - music.bp.bigshot
-  - music.bp.blindinglights
-  - music.bp.blue
-  - music.bp.brainpower
-  - music.bp.californiagurls
-  - music.bp.callmemaybe
-  - music.bp.carefree
-  - music.bp.closer
-  - music.bp.countingstars
-  - music.bp.crabravemegalovania
-  - music.bp.dangerous
-  - music.bp.darkhorse
-  - music.bp.ddlcmaintheme
-  - music.bp.deathbyglamour
-  - music.bp.dejavu
-  - music.bp.despcito
-  - music.bp.dontletmedown
-  - music.bp.dontworry
-  - music.bp.feelsoclose
-  - music.bp.gangnamstyle
-  - music.bp.gasgasgas
-  - music.bp.godisagirl
-  - music.bp.harderbetterfasterstronger
-  - music.bp.heymama
-  - music.bp.howtobeaheartbreaker
-  - music.bp.ifihadachicken
-  - music.bp.ikissedagirl
-  - music.bp.itsgoingdownnow
-  - music.bp.leanon
-  - music.bp.lemontree
-  - music.bp.letsgetitstarted
-  - music.bp.makeamove
-  - music.bp.malotebya
-  - music.bp.mamalyuba
-  - music.bp.megalovania
-  - music.bp.packethero
-  - music.bp.pikagirl
-  - music.bp.poempanic
-  - music.bp.quirkydog
-  - music.bp.renaicirculation
-  - music.bp.rickroll
-  - music.bp.robotrock
-  - music.bp.rockefellerstreet
-  - music.bp.runninginthenineties
-  - music.bp.sandplanet
-  - music.bp.saygoodbye
-  - music.bp.scatman
-  - music.bp.screamshout
-  - music.bp.september
-  - music.bp.shikanokoeurobeat
-  - music.bp.shootingstars
-  - music.bp.sugar
-  - music.bp.sweetdreams
-  - music.bp.takeahint
-  - music.bp.thanksforhtememories
-  - music.bp.thebuilder
-  - music.bp.therealslimshady
-  - music.bp.thislittlegirl
-  - music.bp.tocatoca
-  - music.bp.umbrella
-  - music.bp.wakemeup
-  - music.bp.wefoundlove
-  - music.bp.whatislove
-  - music.bp.wholikestoparty
-  - music.bp.worldismine
-  - music.bp.heatup
-  - music.bp.nightofnights
-  - music.bp.popipo
-  - music.bp.pressingpursuit
-  - music.bp.ringside
-  - music.bp.theworldrevolving
-  - music.bp.united
-  - music.bp.unity
+playlist:
+  - ==: Music
+    key: "lobby.music.blinding_lights"
+    duration: 20
+    author: "The Weeknd"
+    title: "Blinding Lights"
+
+  - ==: Music
+    key: "lobby.music.all_star"
+    duration: 20
+    author: "Smash Mouth"
+    title: "All Star"
+
+  - ==: Music
+    key: "lobby.music.around_the_world"
+    duration: 20
+    author: "Daft Punk"
+    title: "Around the World"
+
+  - ==: Music
+    key: "lobby.music.axel_f"
+    duration: 20
+    author: "Crazy Frog"
+    title: "Axel F"
+
+  - ==: Music
+    key: "lobby.music.blue"
+    duration: 20
+    author: "Eiffel 65"
+    title: "Blue"
+
+  - ==: Music
+    key: "lobby.music.california_gurls"
+    duration: 20
+    author: "Katty Perry ft. Snoop Dogg"
+    title: "California Gurls"
+
+  - ==: Music
+    key: "lobby.music.call_me_maybe"
+    duration: 20
+    author: "Carly Rae Jepsen"
+    title: "Call Me Maybe"
+
+  - ==: Music
+    key: "lobby.music.closer"
+    duration: 20
+    author: "The Chainsmokers ft. Halsey"
+    title: "Closer"
+
+  - ==: Music
+    key: "lobby.music.death_by_glamour"
+    duration: 20
+    author: "Toby Fox"
+    title: "Death By Glamour"
+
+  - ==: Music
+    key: "lobby.music.deja_vu"
+    duration: 20
+    author: "Tsuko G"
+    title: "Deja Vu (Initial D)"
+
+  - ==: Music
+    key: "lobby.music.dont_let_me_down"
+    duration: 20
+    author: "The Chainsmokers ft. Daya"
+    title: "Don't Let Me Down"
+
+  - ==: Music
+    key: "lobby.music.dont_worry"
+    duration: 20
+    author: "Madcon ft. Ray Dalton"
+    title: "Don't Worry"
+
+  - ==: Music
+    key: "lobby.music.faded"
+    duration: 20
+    author: "Alan Walker"
+    title: "Faded"
+
+  - ==: Music
+    key: "lobby.music.feel_so_close"
+    duration: 20
+    author: "Calvin Harris"
+    title: "Feel So Close"
+
+  - ==: Music
+    key: "lobby.music.gangnam_style"
+    duration: 20
+    author: "Psy"
+    title: "Gangnam Style"
+
+  - ==: Music
+    key: "lobby.music.gas_gas_gas"
+    duration: 20
+    author: "Manuel"
+    title: "Gas Gas Gas"
+
+  - ==: Music
+    key: "lobby.music.harder_better_faster_stronger"
+    duration: 20
+    author: "Daft Punk"
+    title: "Harder Better Faster Stronger"
+
+  - ==: Music
+    key: "lobby.music.lean_on"
+    duration: 20
+    author: "Major Lazer & DJ Snake"
+    title: "Lean On"
+
+  - ==: Music
+    key: "lobby.music.lets_get_it_started"
+    duration: 20
+    author: "The Black Eyed Peas"
+    title: "Let's Get It Started (Spike Mix)"
+
+
+  - ==: Music
+    key: "lobby.music.malo_tebya"
+    duration: 20
+    author: "DJ Spizdil"
+    title: "Malo Tebya (Hardstyle Remix)"
+
+  - ==: Music
+    key: "lobby.music.mama_lyuba"
+    duration: 20
+    author: "SEREBRO"
+    title: "Мама Люба"
+
+
+  - ==: Music
+    key: "lobby.music.megalovania"
+    duration: 20
+    author: "Toby Fox"
+    title: "MEGALOVANIA"
+
+  - ==: Music
+    key: "lobby.music.never_gonna_give_you_up"
+    duration: 20
+    author: "Rick Astley"
+    title: "Never Gonna Give You Up"
+
+  - ==: Music
+    key: "lobby.music.pressing_pursuit"
+    duration: 20
+    author: "Phoenix Wright Ace Attorney OST"
+    title: "Pressing Pursuit"
+
+  - ==: Music
+    key: "lobby.music.running_in_the_nineties"
+    duration: 20
+    author: "MAX COVERI"
+    title: "RUNNING IN THE 90's"
+
+  - ==: Music
+    key: "lobby.music.scatman"
+    duration: 20
+    author: "Scatman John"
+    title: "Scatman"
+
+  - ==: Music
+    key: "lobby.music.september"
+    duration: 20
+    author: "Earth, Wind & Fire"
+    title: "September"
+
+  - ==: Music
+    key: "lobby.music.shooting_stars"
+    duration: 20
+    author: "Bag Raiders"
+    title: "Shooting Stars"
+
+  - ==: Music
+    key: "lobby.music.sugar"
+    duration: 20
+    author: "Maroon 5"
+    title: "Sugar"
+
+  - ==: Music
+    key: "lobby.music.sweet_dreams"
+    duration: 20
+    author: "Eurythmics, Annie Lennox, Dave Stewart"
+    title: "Sweet Dreams"
+
+  - ==: Music
+    key: "lobby.music.the_spectre"
+    duration: 20
+    author: "Alan Walker"
+    title: "The Spectre"
+
+  - ==: Music
+    key: "lobby.music.unity"
+    duration: 20
+    author: "TheFatRat"
+    title: "Unity"
+
+  - ==: Music
+    key: "lobby.music.wake_me_up"
+    duration: 20
+    author: "Avicii"
+    title: "Wake Me Up"
+
+  - ==: Music
+    key: "lobby.music.we_found_love"
+    duration: 20
+    author: "Rihanna ft. Calvin Harris"
+    title: "We Found Love"
+
+  - ==: Music
+    key: "lobby.music.what_is_love"
+    duration: 20
+    author: "Haddaway"
+    title: "What Is Love"
