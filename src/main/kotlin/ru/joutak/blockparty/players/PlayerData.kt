@@ -125,7 +125,7 @@ data class PlayerData(
             yaml.set("nickname", Bukkit.getOfflinePlayer(playerUuid).name)
             yaml.save(file)
         } catch (e: IOException) {
-            PluginManager.getLogger().severe("Ошибка при сохранении информации о игроке: ${e.message}")
+            PluginManager.logger.severe("Ошибка при сохранении информации о игроке: ${e.message}")
         } finally {
             cache.remove(playerUuid)
         }

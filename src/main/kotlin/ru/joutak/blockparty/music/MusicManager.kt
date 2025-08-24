@@ -12,7 +12,7 @@ class MusicManager {
     private var musicName = music.random()
 
     companion object {
-        private val musicFile = File(PluginManager.getDataFolder(), "music.yml")
+        private val musicFile = File(PluginManager.dataFolder, "music.yml")
         private val music = mutableListOf<String>()
 
         fun loadMusic() {
@@ -24,7 +24,7 @@ class MusicManager {
             try {
                 musicList.forEach { music.add(it) }
             } catch (e: Exception) {
-                PluginManager.getLogger().severe("Ошибка при загрузке списка музыки: ${e.message}")
+                PluginManager.logger.severe("Ошибка при загрузке списка музыки: ${e.message}")
             }
         }
     }

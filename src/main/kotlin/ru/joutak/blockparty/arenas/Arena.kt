@@ -42,7 +42,7 @@ data class Arena(
 
     companion object {
         fun deserialize(values: Map<String, Any>): Arena {
-            PluginManager.getLogger().info("Десериализация информации об арене ${values["name"]}")
+            PluginManager.logger.info("Десериализация информации об арене ${values["name"]}")
             return Arena(
                 values["name"] as String,
                 values["worldName"] as String,
@@ -105,10 +105,10 @@ data class Arena(
         val world = Bukkit.getWorld(worldName)!!
         val mvWorld = PluginManager.multiverseCore.mvWorldManager.getMVWorld(worldName)
 
-        mvWorld.setTime("day")
+        mvWorld.time = "day"
         mvWorld.setEnableWeather(false)
-        mvWorld.setDifficulty(Difficulty.PEACEFUL)
-        mvWorld.setGameMode(GameMode.ADVENTURE)
+        mvWorld.difficulty = Difficulty.PEACEFUL
+        mvWorld.gameMode = GameMode.ADVENTURE
         mvWorld.setPVPMode(false)
         mvWorld.hunger = false
 

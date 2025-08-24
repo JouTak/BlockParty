@@ -6,7 +6,7 @@ import java.io.File
 import java.io.IOException
 
 object ArenaManager {
-    private val arenasFile = File(PluginManager.getDataFolder(), "arenas.yml")
+    private val arenasFile = File(PluginManager.dataFolder, "arenas.yml")
     private val arenas = mutableMapOf<String, Arena>()
 
     fun add(arena: Arena) {
@@ -67,7 +67,7 @@ object ArenaManager {
             try {
                 add(Arena.deserialize(value))
             } catch (e: Exception) {
-                PluginManager.getLogger().severe("Ошибка при загрузке зон: ${e.message}")
+                PluginManager.logger.severe("Ошибка при загрузке зон: ${e.message}")
                 break
             }
         }
@@ -86,7 +86,7 @@ object ArenaManager {
         try {
             arenasYaml.save(arenasFile)
         } catch (e: IOException) {
-            PluginManager.getLogger().severe("Ошибка при сохранении зон: ${e.message}")
+            PluginManager.logger.severe("Ошибка при сохранении зон: ${e.message}")
         }
     }
 }

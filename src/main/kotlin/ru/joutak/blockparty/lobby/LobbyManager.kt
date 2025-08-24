@@ -35,7 +35,7 @@ object LobbyManager {
     init {
         if (Bukkit.getWorld(Config.get(ConfigKeys.LOBBY_WORLD_NAME)) == null) {
             world = Bukkit.getWorlds()[0]
-            PluginManager.getLogger().warning(
+            PluginManager.logger.warning(
                 "Отсутствует мир ${Config.get(ConfigKeys.LOBBY_WORLD_NAME)}! В качестве лобби используется мир ${world.name}.",
             )
         } else {
@@ -46,10 +46,10 @@ object LobbyManager {
         worldManager.setFirstSpawnWorld(world.name)
         val mvWorld = worldManager.getMVWorld(world)
 
-        mvWorld.setTime("day")
+        mvWorld.time = "day"
         mvWorld.setEnableWeather(false)
-        mvWorld.setDifficulty(Difficulty.PEACEFUL)
-        mvWorld.setGameMode(GameMode.ADVENTURE)
+        mvWorld.difficulty = Difficulty.PEACEFUL
+        mvWorld.gameMode = GameMode.ADVENTURE
         mvWorld.setPVPMode(false)
         mvWorld.hunger = false
 
