@@ -1,7 +1,7 @@
 package ru.joutak.blockparty.utils
 
-import com.onarandombox.MultiverseCore.MultiverseCore
 import org.bukkit.Bukkit
+import org.mvplugins.multiverse.core.MultiverseCore
 import ru.joutak.blockparty.BlockPartyPlugin
 
 object PluginManager {

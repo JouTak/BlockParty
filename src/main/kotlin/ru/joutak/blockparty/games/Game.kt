@@ -54,7 +54,7 @@ class Game(
             playerData.addGame(this.uuid)
             onlinePlayers.add(playerUuid)
             Bukkit.getPlayer(playerUuid)?.let {
-                PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
+                it.teleport(arena.center)
                 LobbyManager.removeFromReadyPlayers(it)
                 it.gameMode = GameMode.ADVENTURE
                 scoreboard.setFor(it)

@@ -29,7 +29,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly("com.onarandombox.multiversecore:multiverse-core:$multiverseVersion")
+    compileOnly("org.mvplugins.multiverse.core:multiverse-core:$multiverseVersion")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
     compileOnly("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     compileOnly("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")

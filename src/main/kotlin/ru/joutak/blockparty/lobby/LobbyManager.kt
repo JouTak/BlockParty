@@ -12,6 +12,7 @@ import org.bukkit.GameMode
 import org.bukkit.GameRule
 import org.bukkit.World
 import org.bukkit.entity.Player
+import org.mvplugins.multiverse.core.MultiverseCoreApi
 import ru.joutak.blockparty.BlockPartyPlugin
 import ru.joutak.blockparty.arenas.ArenaManager
 import ru.joutak.blockparty.config.Config
@@ -42,16 +43,26 @@ object LobbyManager {
             world = Bukkit.getWorld(Config.get(ConfigKeys.LOBBY_WORLD_NAME))!!
         }
 
-        val worldManager = PluginManager.multiverseCore.mvWorldManager
-        worldManager.setFirstSpawnWorld(world.name)
-        val mvWorld = worldManager.getMVWorld(world)
+        val coreApi = MultiverseCoreApi.get();
+        val worldManager = coreApi.worldManager
 
-        mvWorld.time = "day"
-        mvWorld.setEnableWeather(false)
-        mvWorld.difficulty = Difficulty.PEACEFUL
-        mvWorld.gameMode = GameMode.ADVENTURE
-        mvWorld.setPVPMode(false)
-        mvWorld.hunger = false
+        val mvWorldOption = worldManager.getWorld(world.name)!!
+        if (mvWorldOption.isDefined){
+            val mvWorld = mvWorldOption.get()
+
+            mvWorld.setAllowWeather(false)
+            mvWorld.setDifficulty(Difficulty.PEACEFUL)
+            mvWorld.setGameMode(GameMode.ADVENTURE)
+            mvWorld.setPvp(false)
+            mvWorld.setHunger(false)
+
+            try {
+                val setTimeMethod = mvWorld.javaClass.getMethod("setTime", Long::class.java)
+                setTimeMethod.invoke(mvWorld, 1000L) // Day time
+            } catch (_: Exception) {
+            }
+        }
+
 
         world.setGameRule(GameRule.FALL_DAMAGE, false)
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
@@ -61,13 +72,8 @@ object LobbyManager {
     }
 
     fun teleportToLobby(player: Player) {
-        PluginManager.multiverseCore.teleportPlayer(
-            Bukkit.getConsoleSender(),
-            player,
-            PluginManager.multiverseCore.mvWorldManager
-                .getMVWorld(world)
-                .spawnLocation,
-        )
+        player.teleport(world.spawnLocation)
+
         LobbyReadyBossBar.setFor(player)
         val audience = Audience.audience(player)
 

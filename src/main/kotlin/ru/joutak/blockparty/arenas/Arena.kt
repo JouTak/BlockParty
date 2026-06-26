@@ -9,6 +9,7 @@ import org.bukkit.GameRule
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
+import org.mvplugins.multiverse.core.MultiverseCoreApi
 import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.utils.PluginManager
@@ -103,14 +104,30 @@ data class Arena(
 
     fun reset() {
         val world = Bukkit.getWorld(worldName)!!
-        val mvWorld = PluginManager.multiverseCore.mvWorldManager.getMVWorld(worldName)
 
-        mvWorld.time = "day"
-        mvWorld.setEnableWeather(false)
-        mvWorld.difficulty = Difficulty.PEACEFUL
-        mvWorld.gameMode = GameMode.ADVENTURE
-        mvWorld.setPVPMode(false)
-        mvWorld.hunger = false
+        val coreApi = MultiverseCoreApi.get();
+        val worldManager = coreApi.worldManager
+
+        val mvWorldOption = worldManager.getWorld(worldName)
+
+        if (mvWorldOption.isDefined){
+            val mvWorld = mvWorldOption.get()
+
+            mvWorld.setAllowWeather(false)
+            mvWorld.setDifficulty(Difficulty.PEACEFUL)
+            mvWorld.setGameMode(GameMode.ADVENTURE)
+            mvWorld.setPvp(false)
+            mvWorld.setHunger(false)
+
+            try {
+                val setTimeMethod = mvWorld.javaClass.getMethod("setTime", Long::class.java)
+                setTimeMethod.invoke(mvWorld, 1000L) // Day time
+            } catch (_: Exception) {
+            }
+        } else {
+            PluginManager.logger.warning("Мир $worldName не зарегистрирован в Multiverse-Core!")
+        }
+
 
         world.setGameRule(GameRule.FALL_DAMAGE, false)
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
