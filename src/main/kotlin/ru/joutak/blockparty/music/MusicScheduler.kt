@@ -3,7 +3,12 @@ package ru.joutak.blockparty.music
 class MusicScheduler {
     private val playedMusic: MutableSet<Music> = hashSetOf()
 
-    fun getNextMusic(): Music {
+    fun getNextMusic(): Music? {
+        val playlist = MusicManager.getPlaylist()
+        if (playlist.isEmpty()) {
+            return null
+        }
+
         if (playedMusic.size == MusicManager.getPlaylist().size) {
             playedMusic.clear()
         }

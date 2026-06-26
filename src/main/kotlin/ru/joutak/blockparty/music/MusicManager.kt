@@ -12,6 +12,11 @@ object MusicManager {
 
     fun load() {
         playlist = loadPlaylist() ?: setOf()
+        if (playlist.isEmpty()) {
+            PluginManager.logger.warning("[BlockParty] Список музыки пуст! Музыка не будет проигрываться.")
+        } else {
+            PluginManager.logger.info("[BlockParty] Загружено ${playlist.size} музыкальных треков")
+        }
     }
 
     private fun loadPlaylist(): Set<Music>? {
@@ -19,7 +24,17 @@ object MusicManager {
             PluginManager.logger.severe(
                 "Отсутствует файл со списком доступной музыки (${musicFile.path}), пожалуйста, проверьте и перезагрузите плагин!",
             )
-            return null
+            try {
+                musicFile.parentFile?.mkdirs()
+                musicFile.createNewFile()
+                val defaultYaml = YamlConfiguration()
+                defaultYaml.set("playlist", listOf<Map<String, Any>>())
+                defaultYaml.save(musicFile)
+                PluginManager.logger.info("[BlockParty] Создан пустой music.yml")
+            } catch (e: Exception) {
+                PluginManager.logger.severe("[BlockParty] Не удалось создать music.yml: ${e.message}")
+            }
+            return emptySet()
         }
 
         try {

@@ -34,17 +34,19 @@ class MusicPlayer {
     }
 
     private fun playFor(playersUuids: Iterable<UUID>) {
+        val currentMusic = music ?: return
         for (uuid in playersUuids) {
             Bukkit.getPlayer(uuid)?.let {
-                it.playSound(music.toSound(0.25f), it.location.x, it.location.y, it.location.z)
-                showSongTitleTo(it, music)
+                it.playSound(currentMusic.toSound(0.25f), it.location.x, it.location.y, it.location.z)
+                showSongTitleTo(it, currentMusic)
             }
         }
     }
 
     fun stopFor(playersUuids: Iterable<UUID>) {
+        val currentMusic = music ?: return
         for (uuid in playersUuids) {
-            Bukkit.getPlayer(uuid)?.stopSound(music.toSoundStop())
+            Bukkit.getPlayer(uuid)?.stopSound(currentMusic.toSoundStop())
         }
     }
 
