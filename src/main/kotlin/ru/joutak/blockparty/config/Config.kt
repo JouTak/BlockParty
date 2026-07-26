@@ -5,11 +5,11 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 
 object Config {
-    private val configFile = File(PluginManager.getDataFolder(), "config.yml")
+    private val configFile = File(PluginManager.dataFolder, "config.yml")
     private val config: YamlConfiguration
 
     init {
-        PluginManager.getLogger().info("Загрузка значений из конфига...")
+        PluginManager.logger.info("Загрузка значений из конфига...")
         if (!configFile.exists()) {
             PluginManager.blockParty.saveResource("config.yml", true)
         }
@@ -21,7 +21,7 @@ object Config {
         for (key in ConfigKeys.all) {
             if (!config.contains(key.path)) {
                 PluginManager
-                    .getLogger()
+                    .logger
                     .warning("Не найден ключ ${key.path} в конфиге! Взято стандартное значение: ${key.value}")
                 config.set(key.path, key.value)
             }

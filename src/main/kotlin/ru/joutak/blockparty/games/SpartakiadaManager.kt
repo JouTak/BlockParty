@@ -15,8 +15,8 @@ import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
 
 object SpartakiadaManager {
-    val spartakiadaFolder = File(PluginManager.getDataFolder(), "spartakiada").apply { mkdirs() }
-    private val participantsFile = File(PluginManager.getDataFolder(), "participants.yml")
+    val spartakiadaFolder = File(PluginManager.dataFolder, "spartakiada").apply { mkdirs() }
+    private val participantsFile = File(PluginManager.dataFolder, "participants.yml")
     private val winnersFile = File(spartakiadaFolder, "winners.yml").apply { createNewFile() }
     private var watchThread: Thread? = null
     private val participants = mutableSetOf<String>()
@@ -91,7 +91,7 @@ object SpartakiadaManager {
 
     fun checkPlayers() {
         if (!Config.get(ConfigKeys.SPARTAKIADA_MODE)) return
-        PluginManager.getLogger().info("Проверка текущих игроков на возможность участия в спартакиаде...")
+        PluginManager.logger.info("Проверка текущих игроков на возможность участия в спартакиаде...")
 
         for (player in Bukkit.getOnlinePlayers()) {
             checkPlayer(player)
@@ -147,7 +147,7 @@ object SpartakiadaManager {
                         val changed = event.context() as? java.nio.file.Path ?: continue
                         if (changed.fileName.toString().equals("participants.yml", ignoreCase = true)) {
                             PluginManager
-                                .getLogger()
+                                .logger
                                 .info("Обнаружено изменение participants.yml, перезагрузка списка участников...")
                             reload()
                             // PluginManager.getLogger().info(participants.joinToString("\n"))

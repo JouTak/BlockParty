@@ -48,7 +48,7 @@ class GameLogger(
                 }
             }
 
-        logger.setParent(PluginManager.getLogger())
+        logger.setParent(PluginManager.logger)
         logger.addHandler(logFileHandler)
     }
 
@@ -77,7 +77,7 @@ class GameLogger(
         try {
             gameData.save(resultFile)
         } catch (e: IOException) {
-            PluginManager.getLogger().severe("Ошибка при сохранении информации об игре: ${e.message}")
+            PluginManager.logger.severe("Ошибка при сохранении информации об игре: ${e.message}")
         }
     }
 

@@ -19,9 +19,9 @@ import ru.joutak.blockparty.config.Config
 import ru.joutak.blockparty.config.ConfigKeys
 import ru.joutak.blockparty.lobby.LobbyManager
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
-import ru.joutak.blockparty.music.MusicManager
 import ru.joutak.blockparty.players.PlayerData
 import ru.joutak.blockparty.utils.PluginManager
+import ru.joutak.blockparty.music.MusicManager
 import java.util.UUID
 
 class Game(
@@ -54,7 +54,7 @@ class Game(
             playerData.addGame(this.uuid)
             onlinePlayers.add(playerUuid)
             Bukkit.getPlayer(playerUuid)?.let {
-                PluginManager.multiverseCore.teleportPlayer(Bukkit.getConsoleSender(), it, arena.center)
+                it.teleport(arena.center)
                 LobbyManager.removeFromReadyPlayers(it)
                 it.gameMode = GameMode.ADVENTURE
                 scoreboard.setFor(it)
