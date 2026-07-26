@@ -17,9 +17,7 @@ import ru.joutak.blockparty.listeners.PlayerMoveListener
 import ru.joutak.blockparty.listeners.PlayerQuitListener
 import ru.joutak.blockparty.listeners.ProjectileHitEventListener
 import ru.joutak.blockparty.lobby.LobbyReadyBossBar
-import ru.joutak.blockparty.music.Music
 import ru.joutak.blockparty.music.MusicManager
-import ru.joutak.blockparty.music.MusicPlayer
 import ru.joutak.blockparty.players.PlayerData
 
 class BlockPartyPlugin : JavaPlugin() {
@@ -60,12 +58,10 @@ class BlockPartyPlugin : JavaPlugin() {
     }
 
     private fun loadData() {
-        ConfigurationSerialization.registerClass(Music::class.java, "Music")
-
         PlayerData.reloadDatas()
         SpartakiadaManager.reload()
         ArenaManager.loadArenas()
-        MusicManager.load()
+        MusicManager.loadMusic()
     }
 
     private fun registerEvents() {

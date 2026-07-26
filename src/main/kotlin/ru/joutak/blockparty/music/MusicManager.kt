@@ -1,55 +1,163 @@
 package ru.joutak.blockparty.music
 
+import org.bukkit.Bukkit
+import org.bukkit.SoundCategory
 import org.bukkit.configuration.file.YamlConfiguration
 import ru.joutak.blockparty.utils.PluginManager
 import java.io.File
+import java.util.UUID
 
-object MusicManager {
-    private val musicFile = File(PluginManager.dataFolder, "music.yml")
-    private var playlist: Set<Music> = setOf()
+class MusicManager {
+    private var isMusicPlaying = false
+    private var musicName: String? = null
+    private val playedMusic = mutableSetOf<String>()
 
-    fun getPlaylist(): Set<Music> = playlist
+    companion object {
+        private val musicFile = File(PluginManager.dataFolder, "music.yml")
+        private val music = mutableListOf<String>()
 
-    fun load() {
-        playlist = loadPlaylist() ?: setOf()
-        if (playlist.isEmpty()) {
-            PluginManager.logger.warning("[BlockParty] Список музыки пуст! Музыка не будет проигрываться.")
-        } else {
-            PluginManager.logger.info("[BlockParty] Загружено ${playlist.size} музыкальных треков")
+        fun loadMusic() {
+            music.clear()
+            // Нельзя обращаться к playedMusic здесь, это поле экземпляра
+
+            if (!musicFile.exists()) {
+                PluginManager.logger.warning("Файл music.yml не найден! Создаю новый...")
+                createDefaultMusicFile()
+                return
+            }
+
+            try {
+                val musicYaml = YamlConfiguration.loadConfiguration(musicFile)
+                val musicList = musicYaml.getList("music")
+
+                if (musicList.isNullOrEmpty()) {
+                    PluginManager.logger.warning("Список музыки пуст!")
+                    return
+                }
+
+                for (item in musicList) {
+                    when (item) {
+                        is String -> {
+                            music.add(item)
+                        }
+                        is Map<*, *> -> {
+                            val key = (item as Map<String, Any>)["key"] as? String
+                            if (key != null) {
+                                music.add(key)
+                            }
+                        }
+                        else -> {
+                            PluginManager.logger.warning("Неизвестный формат в music.yml: $item")
+                        }
+                    }
+                }
+
+                if (music.isEmpty()) {
+                    PluginManager.logger.warning("Не удалось загрузить ни одного трека!")
+                } else {
+                    PluginManager.logger.info("Загружено ${music.size} музыкальных треков")
+                }
+            } catch (e: Exception) {
+                PluginManager.logger.severe("Ошибка при загрузке музыки: ${e.message}")
+                e.printStackTrace()
+                createDefaultMusicFile()
+            }
         }
-    }
 
-    private fun loadPlaylist(): Set<Music>? {
-        if (!musicFile.exists()) {
-            PluginManager.logger.severe(
-                "Отсутствует файл со списком доступной музыки (${musicFile.path}), пожалуйста, проверьте и перезагрузите плагин!",
-            )
+        private fun createDefaultMusicFile() {
             try {
                 musicFile.parentFile?.mkdirs()
                 musicFile.createNewFile()
                 val defaultYaml = YamlConfiguration()
-                defaultYaml.set("playlist", listOf<Map<String, Any>>())
+                defaultYaml.set("music", listOf(
+                    "music.bp.allstar",
+                    "music.bp.angelwithashotgun",
+                    "music.bp.aroundtheworld"
+                ))
                 defaultYaml.save(musicFile)
-                PluginManager.logger.info("[BlockParty] Создан пустой music.yml")
+                music.clear()
+                music.addAll(listOf(
+                    "music.bp.allstar",
+                    "music.bp.angelwithashotgun",
+                    "music.bp.aroundtheworld"
+                ))
+                PluginManager.logger.info("Создан новый music.yml с примерными треками")
             } catch (e: Exception) {
-                PluginManager.logger.severe("[BlockParty] Не удалось создать music.yml: ${e.message}")
+                PluginManager.logger.severe("Не удалось создать music.yml: ${e.message}")
             }
-            return emptySet()
-        }
-
-        try {
-            val musicYaml = YamlConfiguration.loadConfiguration(musicFile)
-            val playlist =
-                musicYaml.getList("playlist")
-                    ?: throw NullPointerException("Не найден ключ playlist в файле с доступной музыкой")
-
-            // PluginManager.logger.info(playlist.toString())
-            PluginManager.logger.info("Список доступной музыки успешно загружен!")
-
-            return playlist.toSet() as Set<Music>
-        } catch (e: Exception) {
-            PluginManager.logger.severe("Не удалось загрузить список доступной музыки: ${e.message}")
-            return null
         }
     }
+
+    fun playCurrentSong(playersUuids: Iterable<UUID>) {
+        if (isMusicPlaying && musicName != null) {
+            playFor(playersUuids)
+        }
+    }
+
+    fun playNextSong(playersUuids: Iterable<UUID>) {
+        if (isMusicPlaying) return
+
+        val playlist = getPlaylist()
+        if (playlist.isEmpty()) {
+            PluginManager.logger.warning("Нет доступной музыки для воспроизведения!")
+            return
+        }
+
+        // Если все треки сыграны, сбрасываем
+        if (playedMusic.size == playlist.size) {
+            playedMusic.clear()
+            PluginManager.logger.info("Все треки сыграны, начинаем заново")
+        }
+
+        // Выбираем следующий трек
+        val availableMusic = playlist.filter { it !in playedMusic }
+        musicName = if (availableMusic.isNotEmpty()) {
+            availableMusic.random()
+        } else {
+            playlist.random()
+        }
+
+        playedMusic.add(musicName!!)
+        playFor(playersUuids)
+        isMusicPlaying = true
+        PluginManager.logger.info("Играет: $musicName")
+    }
+
+    fun stopSong(playersUuids: Iterable<UUID>) {
+        if (!isMusicPlaying || musicName == null) return
+        stopFor(playersUuids)
+        isMusicPlaying = false
+        PluginManager.logger.info("Музыка остановлена")
+    }
+
+    private fun playFor(playersUuids: Iterable<UUID>) {
+        val currentMusic = musicName ?: return
+        val soundName = if (currentMusic.startsWith("minecraft:")) currentMusic else "minecraft:$currentMusic"
+
+        for (uuid in playersUuids) {
+            Bukkit.getPlayer(uuid)?.let { player ->
+                player.playSound(
+                    player.location,
+                    soundName,
+                    SoundCategory.RECORDS,
+                    0.25f,
+                    1.0f
+                )
+            }
+        }
+    }
+
+    fun stopFor(playersUuids: Iterable<UUID>) {
+        val currentMusic = musicName ?: return
+        val soundName = if (currentMusic.startsWith("minecraft:")) currentMusic else "minecraft:$currentMusic"
+
+        for (uuid in playersUuids) {
+            Bukkit.getPlayer(uuid)?.stopSound(soundName, SoundCategory.RECORDS)
+        }
+    }
+
+    fun isPlaying(): Boolean = isMusicPlaying
+    fun getCurrentMusic(): String? = musicName
+
+    private fun getPlaylist(): List<String> = music
 }
